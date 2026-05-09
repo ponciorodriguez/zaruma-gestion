@@ -5,11 +5,14 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import APP_NAME
 from app.db import Base, engine
+from app.routes import clients
 from app.utils import money
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=APP_NAME)
+
+app.include_router(clients.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/pdf", StaticFiles(directory="pdf"), name="pdf")

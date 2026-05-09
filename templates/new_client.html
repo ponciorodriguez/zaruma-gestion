@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Nuevo cliente</h1>
+        <p>Introduce los datos básicos del cliente.</p>
+    </div>
+
+    <a class="btn" href="/clients">Volver</a>
+</div>
+
+<form class="panel form" method="post" action="/clients">
+
+    <label>
+        Nombre / empresa *
+        <input type="text" name="name" required>
+    </label>
+
+    <label>
+        NIF / CIF
+        <input type="text" name="tax_id">
+    </label>
+
+    <label>
+        Dirección
+        <textarea name="address" rows="3"></textarea>
+    </label>
+
+    <div class="form-grid">
+        <label>
+            Teléfono
+            <input type="text" name="phone">
+        </label>
+
+        <label>
+            Email
+            <input type="email" name="email">
+        </label>
+    </div>
+
+    <label>
+        Observaciones
+        <textarea name="notes" rows="4"></textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/clients">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar cliente</button>
+    </div>
+
+</form>
+
+{% endblock %}
