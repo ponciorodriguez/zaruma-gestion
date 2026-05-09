@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+    <h1>Zaruma Gestión</h1>
+    <p>Aplicación local para presupuestos y facturas.</p>
+</section>
+
+<section class="dashboard-grid">
+
+    <a class="card" href="/clients">
+        <h2>Clientes</h2>
+        <p>Alta y gestión de clientes.</p>
+    </a>
+
+    <a class="card" href="/estimates">
+        <h2>Presupuestos</h2>
+        <p>Crear presupuestos con partidas, IVA y PDF.</p>
+    </a>
+
+    <a class="card" href="/invoices">
+        <h2>Facturas</h2>
+        <p>Facturación autonumerada y PDFs.</p>
+    </a>
+
+    <a class="card" href="/settings">
+        <h2>Configuración</h2>
+        <p>Datos de empresa, logo, IVA y email de aviso.</p>
+    </a>
+
+</section>
+
+{% endblock %}
