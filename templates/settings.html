@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Configuración</h1>
+        <p>Datos de empresa, IVA y avisos por email.</p>
+    </div>
+
+    <a class="btn" href="/">Volver</a>
+</div>
+
+<div class="panel document-view">
+
+    <h2>Datos de empresa</h2>
+
+    <div class="document-info">
+        <div>
+            <p><strong>Nombre:</strong> {{ company_name or "-" }}</p>
+            <p><strong>NIF/CIF:</strong> {{ company_nif or "-" }}</p>
+            <p><strong>Dirección:</strong> {{ company_address or "-" }}</p>
+        </div>
+
+        <div>
+            <p><strong>Teléfono:</strong> {{ company_phone or "-" }}</p>
+            <p><strong>Email:</strong> {{ company_email or "-" }}</p>
+            <p><strong>IVA por defecto:</strong> {{ default_vat_rate }}%</p>
+        </div>
+    </div>
+
+    <h2>Aviso de numeración</h2>
+
+    <div class="notes-box">
+        <p><strong>Email destino:</strong> {{ notice_email_to or "-" }}</p>
+        <p><strong>Activo:</strong> {{ "Sí" if notice_email_enabled else "No" }}</p>
+    </div>
+
+    <h2>Logo PDF</h2>
+
+    <div class="notes-box">
+        <p>Más adelante pondremos aquí la subida del logo.</p>
+        <p>De momento podremos usar un archivo fijo en:</p>
+        <pre>static/logo.png</pre>
+    </div>
+
+</div>
+
+{% endblock %}
