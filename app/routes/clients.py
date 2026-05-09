@@ -6,10 +6,12 @@ from app import models
 from app.config import APP_NAME
 from app.db import get_db
 from fastapi.templating import Jinja2Templates
+from app.utils import money
 
 router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
+templates.env.filters["money"] = money
 
 
 @router.get("/clients", response_class=HTMLResponse)

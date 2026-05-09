@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Presupuestos</h1>
+        <p>Listado de presupuestos generados.</p>
+    </div>
+
+    <a class="btn btn-primary" href="/new-estimate">Nuevo presupuesto</a>
+</div>
+
+<div class="panel">
+    {% if estimates %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Título / Obra</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for estimate in estimates %}
+                    <tr>
+                        <td><strong>{{ estimate.number }}</strong></td>
+                        <td>{{ estimate.date }}</td>
+                        <td>{{ estimate.client.name if estimate.client else "-" }}</td>
+                        <td>{{ estimate.title or "-" }}</td>
+                        <td>
+                            <span class="badge">{{ estimate.status }}</span>
+                        </td>
+                        <td><strong>{{ estimate.total_amount | money }}</strong></td>
+                        <td>
+                            <a class="btn btn-small" href="/estimates/{{ estimate.id }}">Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty">
+            <h2>No hay presupuestos todavía</h2>
+            <p>Crea el primer presupuesto para empezar.</p>
+            <a class="btn btn-primary" href="/new-estimate">Crear presupuesto</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

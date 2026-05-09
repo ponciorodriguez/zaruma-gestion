@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Facturas</h1>
+        <p>Listado de facturas generadas.</p>
+    </div>
+
+    <a class="btn btn-primary" href="/new-invoice">Nueva factura</a>
+</div>
+
+<div class="panel">
+    {% if invoices %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Título / Obra</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><strong>{{ invoice.number }}</strong></td>
+                        <td>{{ invoice.date }}</td>
+                        <td>{{ invoice.client.name if invoice.client else "-" }}</td>
+                        <td>{{ invoice.title or "-" }}</td>
+                        <td><span class="badge">{{ invoice.status }}</span></td>
+                        <td><strong>{{ invoice.total_amount | money }}</strong></td>
+                        <td>
+                            <a class="btn btn-small" href="/invoices/{{ invoice.id }}">Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty">
+            <h2>No hay facturas todavía</h2>
+            <p>Crea la primera factura para empezar.</p>
+            <a class="btn btn-primary" href="/new-invoice">Crear factura</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

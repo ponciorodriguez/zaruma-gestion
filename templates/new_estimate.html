@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Nuevo presupuesto</h1>
+        <p>Número previsto: <strong>{{ next_number }}</strong></p>
+    </div>
+
+    <a class="btn" href="/estimates">Volver</a>
+</div>
+
+{% if not clients %}
+<div class="panel warning">
+    <h2>Primero necesitas crear un cliente</h2>
+    <p>Antes de hacer un presupuesto, crea al menos un cliente.</p>
+    <a class="btn btn-primary" href="/new-client">Crear cliente</a>
+</div>
+{% else %}
+
+<form class="panel form" method="post" action="/estimates">
+
+    <div class="form-grid">
+        <label>
+            Cliente *
+            <select name="client_id" required>
+                {% for client in clients %}
+                    <option value="{{ client.id }}">{{ client.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Fecha *
+            <input type="date" name="estimate_date" value="{{ today }}" required>
+        </label>
+    </div>
+
+    <label>
+        Título / Obra
+        <input type="text" name="title" placeholder="Ej: Reforma barbacoa bajo escalera">
+    </label>
+
+    <label>
+        Dirección de la obra
+        <textarea name="work_address" rows="2"></textarea>
+    </label>
+
+    <label>
+        IVA %
+        <input type="number" name="vat_rate" value="{{ default_vat_rate }}" step="0.01">
+    </label>
+
+    <h2>Partidas</h2>
+
+    <div class="lines-box" id="lines-box">
+        <div class="line-row">
+            <select name="line_type">
+                <option value="mano_obra">Mano de obra</option>
+                <option value="material">Material</option>
+                <option value="otros">Otros</option>
+            </select>
+
+            <input type="text" name="description" placeholder="Descripción de la partida">
+
+            <input type="number" name="quantity" value="1" step="0.01" placeholder="Cantidad">
+
+            <input type="number" name="unit_price" value="0" step="0.01" placeholder="Precio unitario">
+        </div>
+    </div>
+
+    <button class="btn" type="button" onclick="addLine()">Añadir partida</button>
+
+    <label>
+        Notas / condiciones
+        <textarea name="notes" rows="4" placeholder="Validez del presupuesto, forma de pago, observaciones..."></textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/estimates">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar presupuesto</button>
+    </div>
+
+</form>
+
+<script>
+function addLine() {
+    const box = document.getElementById("lines-box");
+    const row = document.createElement("div");
+    row.className = "line-row";
+    row.innerHTML = `
+        <select name="line_type">
+            <option value="mano_obra">Mano de obra</option>
+            <option value="material">Material</option>
+            <option value="otros">Otros</option>
+        </select>
+
+        <input type="text" name="description" placeholder="Descripción de la partida">
+
+        <input type="number" name="quantity" value="1" step="0.01" placeholder="Cantidad">
+
+        <input type="number" name="unit_price" value="0" step="0.01" placeholder="Precio unitario">
+
+        <button class="btn btn-danger" type="button" onclick="this.parentElement.remove()">Quitar</button>
+    `;
+    box.appendChild(row);
+}
+</script>
+
+{% endif %}
+
+{% endblock %}

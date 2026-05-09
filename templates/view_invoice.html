@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Factura {{ invoice.number }}</h1>
+        <p>{{ invoice.client.name if invoice.client else "-" }} · {{ invoice.date }}</p>
+    </div>
+
+    <div class="actions-row">
+        <a class="btn" href="/invoices">Volver</a>
+    </div>
+</div>
+
+<div class="panel document-view">
+
+    <div class="document-info">
+        <div>
+            <h2>Cliente</h2>
+            <p><strong>{{ invoice.client.name if invoice.client else "-" }}</strong></p>
+            <p>{{ invoice.client.tax_id if invoice.client else "" }}</p>
+            <p>{{ invoice.client.address if invoice.client else "" }}</p>
+            <p>{{ invoice.client.phone if invoice.client else "" }}</p>
+            <p>{{ invoice.client.email if invoice.client else "" }}</p>
+        </div>
+
+        <div>
+            <h2>Datos de la factura</h2>
+            <p><strong>Número:</strong> {{ invoice.number }}</p>
+            <p><strong>Fecha:</strong> {{ invoice.date }}</p>
+            <p><strong>Estado:</strong> {{ invoice.status }}</p>
+            <p><strong>Obra:</strong> {{ invoice.title or "-" }}</p>
+            <p><strong>Dirección obra:</strong> {{ invoice.work_address or "-" }}</p>
+        </div>
+    </div>
+
+    <h2>Partidas</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Total línea</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in invoice.lines %}
+                <tr>
+                    <td>{{ line.line_type }}</td>
+                    <td>{{ line.description }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.unit_price | money }}</td>
+                    <td><strong>{{ line.line_total | money }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="totals-box">
+        <div><span>Subtotal mano de obra:</span> <strong>{{ invoice.subtotal_labor | money }}</strong></div>
+        <div><span>Subtotal materiales:</span> <strong>{{ invoice.subtotal_materials | money }}</strong></div>
+        <div><span>Otros conceptos:</span> <strong>{{ invoice.subtotal_others | money }}</strong></div>
+        <div><span>Base imponible:</span> <strong>{{ invoice.base_amount | money }}</strong></div>
+        <div><span>IVA {{ invoice.vat_rate }}%:</span> <strong>{{ invoice.vat_amount | money }}</strong></div>
+        <div class="total-final"><span>Total:</span> <strong>{{ invoice.total_amount | money }}</strong></div>
+    </div>
+
+    {% if invoice.notes %}
+    <h2>Notas</h2>
+    <div class="notes-box">
+        {{ invoice.notes | replace("\n", "<br>") | safe }}
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
