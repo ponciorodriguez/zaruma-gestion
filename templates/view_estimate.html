@@ -9,6 +9,16 @@
     </div>
 
     <div class="actions-row">
+        {% if estimate.pdf_path %}
+            <a class="btn btn-primary" href="/{{ estimate.pdf_path }}" target="_blank">Ver PDF</a>
+        {% endif %}
+
+        <form method="post" action="/estimates/{{ estimate.id }}/generate-pdf" style="display:inline;">
+            <button class="btn btn-primary" type="submit">
+                {% if estimate.pdf_path %}Regenerar PDF{% else %}Generar PDF{% endif %}
+            </button>
+        </form>
+
         <a class="btn" href="/estimates">Volver</a>
     </div>
 </div>
@@ -32,6 +42,9 @@
             <p><strong>Estado:</strong> {{ estimate.status }}</p>
             <p><strong>Obra:</strong> {{ estimate.title or "-" }}</p>
             <p><strong>Dirección obra:</strong> {{ estimate.work_address or "-" }}</p>
+            {% if estimate.pdf_path %}
+                <p><strong>PDF:</strong> {{ estimate.pdf_path }}</p>
+            {% endif %}
         </div>
     </div>
 

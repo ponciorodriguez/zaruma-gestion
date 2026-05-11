@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
+from app.pdf_generator import generate_invoice_pdf
 from app.utils import calculate_totals, generate_invoice_number, money
 
 router = APIRouter()
@@ -143,3 +144,20 @@ def view_invoice(
             "invoice": invoice,
         },
     )
+
+
+@router.post("/invoices/{invoice_id}/generate-pdf")
+def generate_invoice_pdf_route(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not invoice:
+        return RedirectResponse(url="/invoices", status_code=303)
+
+    pdf_path = generate_invoice_pdf(invoice)
+    invoice.pdf_path = pdf_path
+    db.commit()
+
+    return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)

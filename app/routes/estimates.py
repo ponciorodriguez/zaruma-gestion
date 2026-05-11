@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
+from app.pdf_generator import generate_estimate_pdf
 from app.utils import calculate_totals, generate_estimate_number, money
 
 router = APIRouter()
@@ -17,11 +18,7 @@ templates.env.filters["money"] = money
 
 @router.get("/estimates", response_class=HTMLResponse)
 def estimates_page(request: Request, db: Session = Depends(get_db)):
-    estimates = (
-        db.query(models.Estimate)
-        .order_by(models.Estimate.id.desc())
-        .all()
-    )
+    estimates = db.query(models.Estimate).order_by(models.Estimate.id.desc()).all()
 
     return templates.TemplateResponse(
         request=request,
@@ -147,3 +144,20 @@ def view_estimate(
             "estimate": estimate,
         },
     )
+
+
+@router.post("/estimates/{estimate_id}/generate-pdf")
+def generate_estimate_pdf_route(
+    estimate_id: int,
+    db: Session = Depends(get_db),
+):
+    estimate = db.query(models.Estimate).filter(models.Estimate.id == estimate_id).first()
+
+    if not estimate:
+        return RedirectResponse(url="/estimates", status_code=303)
+
+    pdf_path = generate_estimate_pdf(estimate)
+    estimate.pdf_path = pdf_path
+    db.commit()
+
+    return RedirectResponse(url=f"/estimates/{estimate.id}", status_code=303)
