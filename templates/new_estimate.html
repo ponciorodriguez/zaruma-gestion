@@ -54,19 +54,33 @@
 
     <h2>Partidas</h2>
 
+    <div class="lines-help">
+        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.  
+        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.  
+        <strong>Otros:</strong> cantidad = 1 normalmente.
+    </div>
+
+    <div class="line-header">
+        <span>Tipo</span>
+        <span>Concepto / descripción</span>
+        <span>Cantidad / horas / uds.</span>
+        <span>Precio hora / unidad</span>
+        <span></span>
+    </div>
+
     <div class="lines-box" id="lines-box">
         <div class="line-row">
             <select name="line_type">
                 <option value="mano_obra">Mano de obra</option>
                 <option value="material">Material</option>
-                <option value="otros">Otros</option>
+                <option value="otros">Otros / concepto</option>
             </select>
 
-            <input type="text" name="description" placeholder="Descripción de la partida">
+            <input type="text" name="description" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">
 
-            <input type="number" name="quantity" value="1" step="0.01" placeholder="Cantidad">
+            <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
 
-            <input type="number" name="unit_price" value="0" step="0.01" placeholder="Precio unitario">
+            <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
         </div>
     </div>
 
@@ -93,14 +107,14 @@ function addLine() {
         <select name="line_type">
             <option value="mano_obra">Mano de obra</option>
             <option value="material">Material</option>
-            <option value="otros">Otros</option>
+            <option value="otros">Otros / concepto</option>
         </select>
 
-        <input type="text" name="description" placeholder="Descripción de la partida">
+        <input type="text" name="description" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">
 
-        <input type="number" name="quantity" value="1" step="0.01" placeholder="Cantidad">
+        <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
 
-        <input type="number" name="unit_price" value="0" step="0.01" placeholder="Precio unitario">
+        <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
 
         <button class="btn btn-danger" type="button" onclick="this.parentElement.remove()">Quitar</button>
     `;

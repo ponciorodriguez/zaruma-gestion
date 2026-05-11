@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from app import models
 from app.config import APP_NAME
 from app.db import get_db
-from fastapi.templating import Jinja2Templates
 from app.utils import money
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
 
@@ -61,6 +61,56 @@ def create_client(
     )
 
     db.add(client)
+    db.commit()
+
+    return RedirectResponse(url="/clients", status_code=303)
+
+
+@router.get("/edit-client/{client_id}", response_class=HTMLResponse)
+def edit_client_page(
+    client_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    client = db.query(models.Client).filter(models.Client.id == client_id).first()
+
+    if not client:
+        return RedirectResponse(url="/clients", status_code=303)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit_client.html",
+        context={
+            "request": request,
+            "app_name": APP_NAME,
+            "client": client,
+        },
+    )
+
+
+@router.post("/edit-client/{client_id}")
+def update_client(
+    client_id: int,
+    name: str = Form(...),
+    tax_id: str = Form(""),
+    address: str = Form(""),
+    phone: str = Form(""),
+    email: str = Form(""),
+    notes: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    client = db.query(models.Client).filter(models.Client.id == client_id).first()
+
+    if not client:
+        return RedirectResponse(url="/clients", status_code=303)
+
+    client.name = name
+    client.tax_id = tax_id
+    client.address = address
+    client.phone = phone
+    client.email = email
+    client.notes = notes
+
     db.commit()
 
     return RedirectResponse(url="/clients", status_code=303)

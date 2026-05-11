@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Zaruma Gestión",
+            "type": "shell",
+            "command": "./run.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "clear": true
+            }
+        },
+        {
+            "label": "Git Status",
+            "type": "shell",
+            "command": "git status",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git Pull Develop",
+            "type": "shell",
+            "command": "git checkout develop && git pull origin develop",
+            "problemMatcher": []
+        },
+        {
+            "label": "Git Push Develop",
+            "type": "shell",
+            "command": "git status && git add . && git commit -m \"update zaruma gestion\" && git push",
+            "problemMatcher": []
+        }
+    ]
+}

@@ -8,7 +8,10 @@
         <p>Listado de clientes guardados.</p>
     </div>
 
-    <a class="btn btn-primary" href="/new-client">Nuevo cliente</a>
+    <div class="actions-row">
+        <a class="btn" href="/">Volver</a>
+        <a class="btn btn-primary" href="/new-client">Nuevo cliente</a>
+    </div>
 </div>
 
 <div class="panel">
@@ -22,6 +25,7 @@
                         <th>Teléfono</th>
                         <th>Email</th>
                         <th>Dirección</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,6 +36,9 @@
                         <td>{{ client.phone or "-" }}</td>
                         <td>{{ client.email or "-" }}</td>
                         <td>{{ client.address or "-" }}</td>
+                        <td>
+                            <a class="btn btn-small" href="/edit-client/{{ client.id }}">Modificar</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

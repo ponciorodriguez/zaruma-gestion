@@ -64,26 +64,7 @@ def create_invoice(
     unit_price: list[float] = Form([]),
     db: Session = Depends(get_db),
 ):
-    lines_data = []
-
-    for idx, desc in enumerate(description):
-        desc = (desc or "").strip()
-        if not desc:
-            continue
-
-        lt = line_type[idx] if idx < len(line_type) else "otros"
-        qty = quantity[idx] if idx < len(quantity) else 1
-        price = unit_price[idx] if idx < len(unit_price) else 0
-
-        lines_data.append(
-            {
-                "line_type": lt,
-                "description": desc,
-                "quantity": qty,
-                "unit_price": price,
-            }
-        )
-
+    lines_data = _build_lines_data(line_type, description, quantity, unit_price)
     totals = calculate_totals(lines_data, vat_rate)
 
     invoice = models.Invoice(
@@ -106,19 +87,7 @@ def create_invoice(
     db.add(invoice)
     db.flush()
 
-    for position, line in enumerate(totals["lines"], start=1):
-        db.add(
-            models.InvoiceLine(
-                invoice_id=invoice.id,
-                line_type=line["line_type"],
-                description=line["description"],
-                quantity=line["quantity"],
-                unit_price=line["unit_price"],
-                line_total=line["line_total"],
-                position=position,
-            )
-        )
-
+    _save_invoice_lines(db, invoice.id, totals["lines"])
     db.commit()
 
     return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
@@ -146,6 +115,77 @@ def view_invoice(
     )
 
 
+@router.get("/edit-invoice/{invoice_id}", response_class=HTMLResponse)
+def edit_invoice_page(
+    invoice_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not invoice:
+        return RedirectResponse(url="/invoices", status_code=303)
+
+    clients = db.query(models.Client).order_by(models.Client.name.asc()).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit_invoice.html",
+        context={
+            "request": request,
+            "app_name": APP_NAME,
+            "invoice": invoice,
+            "clients": clients,
+        },
+    )
+
+
+@router.post("/edit-invoice/{invoice_id}")
+def update_invoice(
+    invoice_id: int,
+    client_id: int = Form(...),
+    invoice_date: str = Form(...),
+    title: str = Form(""),
+    work_address: str = Form(""),
+    notes: str = Form(""),
+    vat_rate: float = Form(DEFAULT_VAT_RATE),
+    line_type: list[str] = Form([]),
+    description: list[str] = Form([]),
+    quantity: list[float] = Form([]),
+    unit_price: list[float] = Form([]),
+    db: Session = Depends(get_db),
+):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not invoice:
+        return RedirectResponse(url="/invoices", status_code=303)
+
+    lines_data = _build_lines_data(line_type, description, quantity, unit_price)
+    totals = calculate_totals(lines_data, vat_rate)
+
+    invoice.date = date.fromisoformat(invoice_date)
+    invoice.client_id = client_id
+    invoice.title = title
+    invoice.work_address = work_address
+    invoice.notes = notes
+    invoice.subtotal_labor = totals["subtotal_labor"]
+    invoice.subtotal_materials = totals["subtotal_materials"]
+    invoice.subtotal_others = totals["subtotal_others"]
+    invoice.base_amount = totals["base_amount"]
+    invoice.vat_rate = totals["vat_rate"]
+    invoice.vat_amount = totals["vat_amount"]
+    invoice.total_amount = totals["total_amount"]
+    invoice.pdf_path = None
+
+    db.query(models.InvoiceLine).filter(models.InvoiceLine.invoice_id == invoice.id).delete()
+    db.flush()
+
+    _save_invoice_lines(db, invoice.id, totals["lines"])
+    db.commit()
+
+    return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
+
+
 @router.post("/invoices/{invoice_id}/generate-pdf")
 def generate_invoice_pdf_route(
     invoice_id: int,
@@ -161,3 +201,42 @@ def generate_invoice_pdf_route(
     db.commit()
 
     return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
+
+
+def _build_lines_data(line_type, description, quantity, unit_price):
+    lines_data = []
+
+    for idx, desc in enumerate(description):
+        desc = (desc or "").strip()
+        if not desc:
+            continue
+
+        lt = line_type[idx] if idx < len(line_type) else "otros"
+        qty = quantity[idx] if idx < len(quantity) else 1
+        price = unit_price[idx] if idx < len(unit_price) else 0
+
+        lines_data.append(
+            {
+                "line_type": lt,
+                "description": desc,
+                "quantity": qty,
+                "unit_price": price,
+            }
+        )
+
+    return lines_data
+
+
+def _save_invoice_lines(db, invoice_id, lines):
+    for position, line in enumerate(lines, start=1):
+        db.add(
+            models.InvoiceLine(
+                invoice_id=invoice_id,
+                line_type=line["line_type"],
+                description=line["description"],
+                quantity=line["quantity"],
+                unit_price=line["unit_price"],
+                line_total=line["line_total"],
+                position=position,
+            )
+        )

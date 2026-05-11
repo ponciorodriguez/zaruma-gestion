@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Modificar cliente</h1>
+        <p>{{ client.name }}</p>
+    </div>
+
+    <a class="btn" href="/clients">Volver</a>
+</div>
+
+<form class="panel form" method="post" action="/edit-client/{{ client.id }}">
+
+    <label>
+        Nombre / empresa *
+        <input type="text" name="name" value="{{ client.name }}" required>
+    </label>
+
+    <label>
+        NIF / CIF
+        <input type="text" name="tax_id" value="{{ client.tax_id or '' }}">
+    </label>
+
+    <label>
+        Dirección
+        <textarea name="address" rows="3">{{ client.address or '' }}</textarea>
+    </label>
+
+    <div class="form-grid">
+        <label>
+            Teléfono
+            <input type="text" name="phone" value="{{ client.phone or '' }}">
+        </label>
+
+        <label>
+            Email
+            <input type="email" name="email" value="{{ client.email or '' }}">
+        </label>
+    </div>
+
+    <label>
+        Observaciones
+        <textarea name="notes" rows="4">{{ client.notes or '' }}</textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/clients">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+    </div>
+
+</form>
+
+{% endblock %}
