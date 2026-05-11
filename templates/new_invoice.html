@@ -55,22 +55,8 @@
     <h2>Partidas</h2>
 
     <div class="lines-help">
-        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.  
-        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.  
-        <strong>Otros:</strong> cantidad = 1 normalmente.
-    </div>
-
-    <div class="line-header">
-        <span>Tipo</span>
-        <span>Concepto / descripción</span>
-        <span>Cantidad / horas / uds.</span>
-        <span>Precio hora / unidad</span>
-        <span></span>
-    </div>
-
-    <div class="lines-help">
-        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.  
-        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.  
+        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.<br>
+        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.<br>
         <strong>Otros:</strong> cantidad = 1 normalmente.
     </div>
 
@@ -95,6 +81,138 @@
             <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
 
             <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
+
+            <span></span>
+        </div>
+    </div>
+
+    <button class="btn" type="button" onclick="addLine()">Añadir partida</button>
+
+    <label>
+        Notas
+        <textarea name="notes" rows="4" placeholder="Forma de pago, vencimiento, observaciones..."></textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/invoices">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar factura</button>
+    </div>
+
+</form>
+
+<script>
+function addLine() {
+    const box = document.getElementById("lines-box");
+    const row = document.createElement("div");
+    row.className = "line-row";
+    row.innerHTML = `
+        <select name="line_type">
+            <option value="mano_obra">Mano de obra</option>
+            <option value="material">Material</option>
+            <option value="otros">Otros / concepto</option>
+        </select>
+
+        <input type="text" name="description" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">
+
+        <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
+
+        <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
+
+        <button class="btn btn-danger" type="button" onclick="this.parentElement.remove()">Quitar</button>
+    `;
+    box.appendChild(row);
+}
+</script>
+
+{% endif %}
+
+{% endblock %}
+EOFcat > templates/new_invoice.html <<'EOF'
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Nueva factura</h1>
+        <p>Número previsto: <strong>{{ next_number }}</strong></p>
+    </div>
+
+    <a class="btn" href="/invoices">Volver</a>
+</div>
+
+{% if not clients %}
+<div class="panel warning">
+    <h2>Primero necesitas crear un cliente</h2>
+    <p>Antes de hacer una factura, crea al menos un cliente.</p>
+    <a class="btn btn-primary" href="/new-client">Crear cliente</a>
+</div>
+{% else %}
+
+<form class="panel form" method="post" action="/invoices">
+
+    <div class="form-grid">
+        <label>
+            Cliente *
+            <select name="client_id" required>
+                {% for client in clients %}
+                    <option value="{{ client.id }}">{{ client.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Fecha *
+            <input type="date" name="invoice_date" value="{{ today }}" required>
+        </label>
+    </div>
+
+    <label>
+        Título / Obra
+        <input type="text" name="title" placeholder="Ej: Reforma barbacoa bajo escalera">
+    </label>
+
+    <label>
+        Dirección de la obra
+        <textarea name="work_address" rows="2"></textarea>
+    </label>
+
+    <label>
+        IVA %
+        <input type="number" name="vat_rate" value="{{ default_vat_rate }}" step="0.01">
+    </label>
+
+    <h2>Partidas</h2>
+
+    <div class="lines-help">
+        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.<br>
+        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.<br>
+        <strong>Otros:</strong> cantidad = 1 normalmente.
+    </div>
+
+    <div class="line-header">
+        <span>Tipo</span>
+        <span>Concepto / descripción</span>
+        <span>Cantidad / horas / uds.</span>
+        <span>Precio hora / unidad</span>
+        <span></span>
+    </div>
+
+    <div class="lines-box" id="lines-box">
+        <div class="line-row">
+            <select name="line_type">
+                <option value="mano_obra">Mano de obra</option>
+                <option value="material">Material</option>
+                <option value="otros">Otros / concepto</option>
+            </select>
+
+            <input type="text" name="description" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">
+
+            <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
+
+            <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
+
+            <span></span>
         </div>
     </div>
 

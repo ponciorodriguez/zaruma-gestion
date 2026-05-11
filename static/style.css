@@ -351,3 +351,45 @@ th {
         display: none;
     }
 }
+
+.lines-help {
+    background: #fff8e1;
+    border-left: 4px solid #f9a825;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #5d4037;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.line-header {
+    display: grid;
+    grid-template-columns: 150px 1fr 150px 160px 80px;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 13px;
+    color: #455a64;
+    padding: 0 2px;
+}
+
+.line-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 150px 160px 80px;
+    gap: 10px;
+    align-items: center;
+}
+
+.line-row input,
+.line-row select {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .line-header {
+        display: none;
+    }
+
+    .line-row {
+        grid-template-columns: 1fr;
+    }
+}
