@@ -126,6 +126,9 @@ def edit_invoice_page(
     if not invoice:
         return RedirectResponse(url="/invoices", status_code=303)
 
+    if invoice.status == "enviada":
+        return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
+
     clients = db.query(models.Client).order_by(models.Client.name.asc()).all()
 
     return templates.TemplateResponse(
@@ -159,6 +162,9 @@ def update_invoice(
 
     if not invoice:
         return RedirectResponse(url="/invoices", status_code=303)
+
+    if invoice.status == "enviada":
+        return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
 
     lines_data = _build_lines_data(line_type, description, quantity, unit_price)
     totals = calculate_totals(lines_data, vat_rate)
@@ -201,6 +207,72 @@ def generate_invoice_pdf_route(
     db.commit()
 
     return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
+
+
+
+@router.post("/invoices/{invoice_id}/mark-sent")
+def mark_invoice_sent_route(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not invoice:
+        return RedirectResponse(url="/invoices", status_code=303)
+
+    invoice.status = "enviada"
+    db.commit()
+
+    return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
+
+
+@router.post("/invoices/{invoice_id}/create-rectifying")
+def create_rectifying_invoice_route(
+    invoice_id: int,
+    db: Session = Depends(get_db),
+):
+    original = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not original:
+        return RedirectResponse(url="/invoices", status_code=303)
+
+    rectifying = models.Invoice(
+        number=generate_invoice_number(db),
+        date=date.today(),
+        client_id=original.client_id,
+        estimate_id=None,
+        title=f"Factura rectificativa de {original.number}",
+        work_address=original.work_address,
+        notes=f"Factura rectificativa de la factura nº {original.number}.",
+        status="pendiente",
+        subtotal_labor=-abs(original.subtotal_labor or 0),
+        subtotal_materials=-abs(original.subtotal_materials or 0),
+        subtotal_others=-abs(original.subtotal_others or 0),
+        base_amount=-abs(original.base_amount or 0),
+        vat_rate=original.vat_rate,
+        vat_amount=-abs(original.vat_amount or 0),
+        total_amount=-abs(original.total_amount or 0),
+    )
+
+    db.add(rectifying)
+    db.flush()
+
+    for position, line in enumerate(original.lines, start=1):
+        db.add(
+            models.InvoiceLine(
+                invoice_id=rectifying.id,
+                line_type=line.line_type,
+                description=f"Rectificación: {line.description}",
+                quantity=-(line.quantity or 0),
+                unit_price=line.unit_price,
+                line_total=-abs(line.line_total or 0),
+                position=position,
+            )
+        )
+
+    db.commit()
+
+    return RedirectResponse(url=f"/invoices/{rectifying.id}", status_code=303)
 
 
 def _build_lines_data(line_type, description, quantity, unit_price):

@@ -39,6 +39,7 @@
                         <td><strong>{{ estimate.total_amount | money }}</strong></td>
                         <td>
                             <a class="btn btn-small" href="/estimates/{{ estimate.id }}">Ver</a>
+                            <a class="btn btn-small" href="/edit-estimate/{{ estimate.id }}">Modificar</a>
                         </td>
                     </tr>
                     {% endfor %}

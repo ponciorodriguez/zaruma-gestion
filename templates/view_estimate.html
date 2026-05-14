@@ -19,6 +19,12 @@
             </button>
         </form>
 
+        {% if estimate.status != "convertido a factura" %}
+        <form method="post" action="/estimates/{{ estimate.id }}/convert-to-invoice" style="display:inline;">
+            <button class="btn btn-primary" type="submit">Convertir en factura</button>
+        </form>
+        {% endif %}
+
         <a class="btn" href="/edit-estimate/{{ estimate.id }}">Modificar</a>
         <a class="btn" href="/estimates">Volver</a>
     </div>

@@ -37,6 +37,9 @@
                         <td><strong>{{ invoice.total_amount | money }}</strong></td>
                         <td>
                             <a class="btn btn-small" href="/invoices/{{ invoice.id }}">Ver</a>
+                            {% if invoice.status != "enviada" %}
+                                <a class="btn btn-small" href="/edit-invoice/{{ invoice.id }}">Modificar</a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

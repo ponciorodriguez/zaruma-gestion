@@ -9,7 +9,7 @@ from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
 from app.pdf_generator import generate_estimate_pdf
-from app.utils import calculate_totals, generate_estimate_number, money
+from app.utils import calculate_totals, generate_estimate_number, generate_invoice_number, money
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -201,6 +201,58 @@ def generate_estimate_pdf_route(
     db.commit()
 
     return RedirectResponse(url=f"/estimates/{estimate.id}", status_code=303)
+
+
+
+@router.post("/estimates/{estimate_id}/convert-to-invoice")
+def convert_estimate_to_invoice_route(
+    estimate_id: int,
+    db: Session = Depends(get_db),
+):
+    estimate = db.query(models.Estimate).filter(models.Estimate.id == estimate_id).first()
+
+    if not estimate:
+        return RedirectResponse(url="/estimates", status_code=303)
+
+    invoice = models.Invoice(
+        number=generate_invoice_number(db),
+        date=date.today(),
+        client_id=estimate.client_id,
+        estimate_id=estimate.id,
+        title=estimate.title,
+        work_address=estimate.work_address,
+        notes=estimate.notes,
+        status="pendiente",
+        subtotal_labor=estimate.subtotal_labor,
+        subtotal_materials=estimate.subtotal_materials,
+        subtotal_others=estimate.subtotal_others,
+        base_amount=estimate.base_amount,
+        vat_rate=estimate.vat_rate,
+        vat_amount=estimate.vat_amount,
+        total_amount=estimate.total_amount,
+    )
+
+    db.add(invoice)
+    db.flush()
+
+    for position, line in enumerate(estimate.lines, start=1):
+        db.add(
+            models.InvoiceLine(
+                invoice_id=invoice.id,
+                line_type=line.line_type,
+                description=line.description,
+                quantity=line.quantity,
+                unit_price=line.unit_price,
+                line_total=line.line_total,
+                position=position,
+            )
+        )
+
+    estimate.status = "convertido a factura"
+
+    db.commit()
+
+    return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
 
 
 def _build_lines_data(line_type, description, quantity, unit_price):
