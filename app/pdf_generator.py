@@ -148,7 +148,7 @@ def _document_data_block(document, styles, title_label):
     return Paragraph("<br/>".join(lines), styles["Small"])
 
 
-def _lines_table(lines):
+def _lines_table(lines, styles):
     data = [
         [
             "Tipo",
@@ -169,7 +169,7 @@ def _lines_table(lines):
         data.append(
             [
                 line_type,
-                Paragraph(_safe_text(line.description), getSampleStyleSheet()["Small"]),
+                Paragraph(_safe_text(line.description), styles["Small"]),
                 f"{line.quantity:g}",
                 _money(line.unit_price),
                 _money(line.line_total),
@@ -310,7 +310,7 @@ def _build_document_pdf(document, output_path, title, title_label):
     story.append(Spacer(1, 8 * mm))
 
     story.append(Paragraph("<b>Partidas</b>", styles["Heading3"]))
-    story.append(_lines_table(document.lines))
+    story.append(_lines_table(document.lines, styles))
     story.append(Spacer(1, 7 * mm))
 
     story.append(_totals_table(document))
