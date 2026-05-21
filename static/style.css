@@ -404,3 +404,7 @@ th {
     font-size: 15px;
     font-family: inherit;
 }
+
+.multiline-text {
+    white-space: pre-line;
+}

@@ -169,7 +169,7 @@ def _lines_table(lines, styles):
         data.append(
             [
                 line_type,
-                Paragraph(_safe_text(line.description), styles["Small"]),
+                Paragraph(_safe_text(line.description).replace("\n", "<br/>"), styles["Small"]),
                 f"{line.quantity:g}",
                 _money(line.unit_price),
                 _money(line.line_total),
