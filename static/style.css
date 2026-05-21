@@ -393,3 +393,14 @@ th {
         grid-template-columns: 1fr;
     }
 }
+
+.line-row textarea {
+    width: 100%;
+    min-height: 42px;
+    resize: vertical;
+    padding: 10px 11px;
+    border: 1px solid #cfd8dc;
+    border-radius: 7px;
+    font-size: 15px;
+    font-family: inherit;
+}
