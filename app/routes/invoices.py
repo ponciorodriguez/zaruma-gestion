@@ -209,7 +209,6 @@ def generate_invoice_pdf_route(
     return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
 
 
-
 @router.post("/invoices/{invoice_id}/mark-sent")
 def mark_invoice_sent_route(
     invoice_id: int,
@@ -262,9 +261,9 @@ def create_rectifying_invoice_route(
             models.InvoiceLine(
                 invoice_id=rectifying.id,
                 line_type=line.line_type,
-                description=f"Rectificación: {line.description}",
-                quantity=-(line.quantity or 0),
-                unit_price=line.unit_price,
+                description=f"Rectificación factura {original.number}:\n{line.description}",
+                quantity=abs(line.quantity or 0),
+                unit_price=-abs(line.unit_price or 0),
                 line_total=-abs(line.line_total or 0),
                 position=position,
             )

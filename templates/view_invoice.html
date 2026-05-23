@@ -20,13 +20,13 @@
         </form>
 
         {% if invoice.status != "enviada" %}
-        <a class="btn" href="/edit-invoice/{{ invoice.id }}">Modificar</a>
+            <a class="btn" href="/edit-invoice/{{ invoice.id }}">Modificar</a>
 
-        <form method="post" action="/invoices/{{ invoice.id }}/mark-sent" style="display:inline;">
-            <button class="btn btn-primary" type="submit">Marcar como enviada</button>
-        </form>
+            <form method="post" action="/invoices/{{ invoice.id }}/mark-sent" style="display:inline;">
+                <button class="btn btn-primary" type="submit">Marcar como enviada</button>
+            </form>
         {% else %}
-        <span class="badge">Factura enviada: edición bloqueada</span>
+            <span class="badge">Factura enviada: edición bloqueada</span>
         {% endif %}
 
         <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" style="display:inline;">
