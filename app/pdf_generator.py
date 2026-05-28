@@ -1,10 +1,9 @@
 import os
-from datetime import datetime
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     Image,
@@ -16,11 +15,6 @@ from reportlab.platypus import (
 )
 
 from app.config import (
-    COMPANY_ADDRESS,
-    COMPANY_EMAIL,
-    COMPANY_NAME,
-    COMPANY_NIF,
-    COMPANY_PHONE,
     ESTIMATES_PDF_DIR,
     INVOICES_PDF_DIR,
 )
@@ -44,72 +38,53 @@ def _ensure_dirs():
     os.makedirs(INVOICES_PDF_DIR, exist_ok=True)
 
 
-def _logo_element():
-    logo_path = "static/logo.png"
+def _header_elements(title, document, styles):
+    elements = []
+    header_path = "static/pdf_header.png"
 
-    if not os.path.exists(logo_path):
-        return Paragraph("", getSampleStyleSheet()["Normal"])
+    if os.path.exists(header_path):
+        img = Image(header_path)
 
-    try:
-        img = Image(logo_path)
-        img.drawHeight = 22 * mm
-        img.drawWidth = 45 * mm
-        return img
-    except Exception:
-        return Paragraph("", getSampleStyleSheet()["Normal"])
+        max_width = 186 * mm
+        ratio = img.imageHeight / float(img.imageWidth)
 
+        img.drawWidth = max_width
+        img.drawHeight = max_width * ratio
 
-def _company_block(styles):
-    company_lines = [
-        f"<b>{COMPANY_NAME or 'Zaruma'}</b>",
-    ]
+        elements.append(img)
+        elements.append(Spacer(1, 6 * mm))
 
-    if COMPANY_NIF:
-        company_lines.append(f"NIF/CIF: {COMPANY_NIF}")
-
-    if COMPANY_ADDRESS:
-        company_lines.append(COMPANY_ADDRESS)
-
-    if COMPANY_PHONE:
-        company_lines.append(f"Tel: {COMPANY_PHONE}")
-
-    if COMPANY_EMAIL:
-        company_lines.append(COMPANY_EMAIL)
-
-    return Paragraph("<br/>".join(company_lines), styles["Small"])
-
-
-def _header(title, number, styles):
-    logo = _logo_element()
-
-    doc_info = Paragraph(
-        f"<b>{title}</b><br/>"
-        f"Nº: {number}<br/>"
-        f"Fecha generación: {datetime.now().strftime('%d/%m/%Y')}",
-        styles["RightSmall"],
+    title_table = Table(
+        [[
+            Paragraph(f"<b>{title}</b>", styles["DocTitle"]),
+            Paragraph(
+                f"<b>Nº:</b> {document.number}<br/>"
+                f"<b>Fecha:</b> {document.date.strftime('%d/%m/%Y') if document.date else ''}",
+                styles["RightSmall"],
+            ),
+        ]],
+        colWidths=[110 * mm, 70 * mm],
     )
 
-    table = Table(
-        [[logo, doc_info]],
-        colWidths=[95 * mm, 80 * mm],
-    )
-
-    table.setStyle(
+    title_table.setStyle(
         TableStyle(
             [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LINEBELOW", (0, 0), (-1, -1), 0.75, colors.HexColor("#607D8B")),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
             ]
         )
     )
 
-    return table
+    elements.append(title_table)
+    elements.append(Spacer(1, 6 * mm))
+
+    return elements
 
 
 def _client_block(client, styles):
     if not client:
-        return Paragraph("<b>Cliente:</b> -", styles["Normal"])
+        return Paragraph("<b>Cliente:</b> -", styles["Small"])
 
     lines = [
         "<b>Cliente</b>",
@@ -120,7 +95,7 @@ def _client_block(client, styles):
         lines.append(f"NIF/CIF: {client.tax_id}")
 
     if client.address:
-        lines.append(client.address)
+        lines.append(_safe_text(client.address).replace("\n", "<br/>"))
 
     if client.phone:
         lines.append(f"Tel: {client.phone}")
@@ -143,20 +118,14 @@ def _document_data_block(document, styles, title_label):
         lines.append(f"Obra: {document.title}")
 
     if document.work_address:
-        lines.append(f"Dirección obra: {document.work_address}")
+        lines.append(f"Dirección obra: {_safe_text(document.work_address).replace(chr(10), '<br/>')}")
 
     return Paragraph("<br/>".join(lines), styles["Small"])
 
 
 def _lines_table(lines, styles):
     data = [
-        [
-            "Tipo",
-            "Descripción",
-            "Cantidad",
-            "Precio unit.",
-            "Total",
-        ]
+        ["Tipo", "Descripción", "Cantidad", "Precio unit.", "Total"]
     ]
 
     for line in lines:
@@ -178,7 +147,7 @@ def _lines_table(lines, styles):
 
     table = Table(
         data,
-        colWidths=[28 * mm, 78 * mm, 23 * mm, 30 * mm, 30 * mm],
+        colWidths=[27 * mm, 82 * mm, 22 * mm, 29 * mm, 29 * mm],
         repeatRows=1,
     )
 
@@ -192,7 +161,6 @@ def _lines_table(lines, styles):
                 ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#B0BEC5")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
-                ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#FAFAFA")),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F5F5")]),
                 ("LEFTPADDING", (0, 0), (-1, -1), 5),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 5),
@@ -235,13 +203,7 @@ def _totals_table(document):
     )
 
     wrapper = Table([[table]], colWidths=[190 * mm])
-    wrapper.setStyle(
-        TableStyle(
-            [
-                ("ALIGN", (0, 0), (0, 0), "RIGHT"),
-            ]
-        )
-    )
+    wrapper.setStyle(TableStyle([("ALIGN", (0, 0), (0, 0), "RIGHT")]))
 
     return wrapper
 
@@ -266,29 +228,34 @@ def _build_document_pdf(document, output_path, title, title_label):
         )
     )
 
+    styles.add(
+        ParagraphStyle(
+            name="DocTitle",
+            parent=styles["Heading2"],
+            fontSize=15,
+            leading=18,
+        )
+    )
+
     pdf = SimpleDocTemplate(
         output_path,
         pagesize=A4,
         rightMargin=12 * mm,
         leftMargin=12 * mm,
-        topMargin=12 * mm,
+        topMargin=10 * mm,
         bottomMargin=14 * mm,
     )
 
     story = []
 
-    story.append(_header(title, document.number, styles))
-    story.append(Spacer(1, 5 * mm))
+    story.extend(_header_elements(title, document, styles))
 
-    company = _company_block(styles)
     client = _client_block(document.client, styles)
     doc_data = _document_data_block(document, styles, title_label)
 
     info_table = Table(
-        [
-            [company, client, doc_data],
-        ],
-        colWidths=[60 * mm, 65 * mm, 65 * mm],
+        [[client, doc_data]],
+        colWidths=[95 * mm, 85 * mm],
     )
 
     info_table.setStyle(
@@ -320,10 +287,6 @@ def _build_document_pdf(document, output_path, title, title_label):
         story.append(Paragraph("<b>Notas / condiciones</b>", styles["Heading3"]))
         story.append(Paragraph(_safe_text(document.notes).replace("\n", "<br/>"), styles["Small"]))
 
-    story.append(Spacer(1, 10 * mm))
-
-    footer_text = "Documento generado con Zaruma Gestión"
-    story.append(Paragraph(footer_text, styles["Small"]))
 
     pdf.build(story)
 
