@@ -428,3 +428,24 @@ th {
     color: #607d8b;
     font-size: 14px;
 }
+
+/* Vista previa cabecera PDF en configuración */
+.pdf-header-preview {
+    background: white;
+    border: 1px solid #cfd8dc;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    max-width: 760px;
+    overflow: hidden;
+}
+
+.pdf-header-preview img {
+    display: block;
+    width: 100%;
+    max-width: 720px;
+    max-height: 220px;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+}
