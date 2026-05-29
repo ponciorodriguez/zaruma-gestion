@@ -12,3 +12,6 @@ pdf/presupuestos/*.pdf
 pdf/facturas/*.pdf
 
 .DS_Store
+
+# Backups locales
+zaruma-data-*.tar.gz
