@@ -5,13 +5,23 @@
 <div class="page-header">
     <div>
         <h1>Configuración</h1>
-        <p>Datos de empresa, IVA y avisos por email.</p>
+        <p>Datos de empresa, IVA, aviso por email y cabecera PDF.</p>
     </div>
 
     <a class="btn" href="/">Volver</a>
 </div>
 
 <div class="panel document-view">
+
+    <h2>Cabecera usada en presupuestos y facturas</h2>
+
+    <div class="pdf-header-preview">
+        <img src="/static/pdf_header.png" alt="Cabecera PDF Zaruma">
+    </div>
+
+    <p class="muted">
+        Esta es la cabecera que se está usando actualmente en los PDFs de presupuestos y facturas.
+    </p>
 
     <h2>Datos de empresa</h2>
 
@@ -36,12 +46,11 @@
         <p><strong>Activo:</strong> {{ "Sí" if notice_email_enabled else "No" }}</p>
     </div>
 
-    <h2>Logo PDF</h2>
+    <h2>Archivo de cabecera PDF</h2>
 
     <div class="notes-box">
-        <p>Más adelante pondremos aquí la subida del logo.</p>
-        <p>De momento podremos usar un archivo fijo en:</p>
-        <pre>static/logo.png</pre>
+        <p>Archivo actual:</p>
+        <pre>static/pdf_header.png</pre>
     </div>
 
 </div>

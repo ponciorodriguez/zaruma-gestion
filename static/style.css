@@ -408,3 +408,23 @@ th {
 .multiline-text {
     white-space: pre-line;
 }
+
+.pdf-header-preview {
+    background: white;
+    border: 1px solid #cfd8dc;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 10px;
+}
+
+.pdf-header-preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.muted {
+    color: #607d8b;
+    font-size: 14px;
+}
