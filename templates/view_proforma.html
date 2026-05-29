@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Factura proforma {{ proforma.number }}</h1>
+        <p>{{ proforma.client.name if proforma.client else "-" }} · {{ proforma.date }}</p>
+    </div>
+
+    <div class="actions-row">
+        {% if proforma.pdf_path %}
+            <a class="btn btn-primary" href="/{{ proforma.pdf_path }}" target="_blank">Ver PDF</a>
+        {% endif %}
+
+        <form method="post" action="/proformas/{{ proforma.id }}/generate-pdf" style="display:inline;">
+            <button class="btn btn-primary" type="submit">
+                {% if proforma.pdf_path %}Regenerar PDF{% else %}Generar PDF{% endif %}
+            </button>
+        </form>
+
+        {% if proforma.status != "convertida a factura" %}
+            <a class="btn" href="/edit-proforma/{{ proforma.id }}">Modificar</a>
+
+            <form method="post" action="/proformas/{{ proforma.id }}/convert-to-invoice" style="display:inline;">
+                <button class="btn btn-primary" type="submit">Convertir en factura</button>
+            </form>
+        {% else %}
+            <span class="badge">Convertida a factura</span>
+        {% endif %}
+
+        <a class="btn" href="/proformas">Volver</a>
+    </div>
+</div>
+
+<div class="panel document-view">
+
+    <div class="document-info">
+        <div>
+            <h2>Cliente</h2>
+            <p><strong>{{ proforma.client.name if proforma.client else "-" }}</strong></p>
+            <p>{{ proforma.client.tax_id if proforma.client else "" }}</p>
+            <p>{{ proforma.client.address if proforma.client else "" }}</p>
+            <p>{{ proforma.client.phone if proforma.client else "" }}</p>
+            <p>{{ proforma.client.email if proforma.client else "" }}</p>
+        </div>
+
+        <div>
+            <h2>Datos de la proforma</h2>
+            <p><strong>Número:</strong> {{ proforma.number }}</p>
+            <p><strong>Fecha:</strong> {{ proforma.date }}</p>
+            <p><strong>Estado:</strong> {{ proforma.status }}</p>
+            <p><strong>Obra:</strong> {{ proforma.title or "-" }}</p>
+            <p><strong>Dirección obra:</strong> {{ proforma.work_address or "-" }}</p>
+            {% if proforma.pdf_path %}
+                <p><strong>PDF:</strong> {{ proforma.pdf_path }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <h2>Partidas</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Concepto / descripción</th>
+                    <th>Cantidad / horas / uds.</th>
+                    <th>Precio hora / unidad</th>
+                    <th>Total línea</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in proforma.lines %}
+                <tr>
+                    <td>{{ line.line_type }}</td>
+                    <td class="multiline-text">{{ line.description }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.unit_price | money }}</td>
+                    <td><strong>{{ line.line_total | money }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="totals-box">
+        <div><span>Subtotal mano de obra:</span> <strong>{{ proforma.subtotal_labor | money }}</strong></div>
+        <div><span>Subtotal materiales:</span> <strong>{{ proforma.subtotal_materials | money }}</strong></div>
+        <div><span>Otros conceptos:</span> <strong>{{ proforma.subtotal_others | money }}</strong></div>
+        <div><span>Base imponible:</span> <strong>{{ proforma.base_amount | money }}</strong></div>
+        <div><span>IVA {{ proforma.vat_rate }}%:</span> <strong>{{ proforma.vat_amount | money }}</strong></div>
+        <div class="total-final"><span>Total:</span> <strong>{{ proforma.total_amount | money }}</strong></div>
+    </div>
+
+    {% if proforma.notes %}
+    <h2>Notas</h2>
+    <div class="notes-box">
+        {{ proforma.notes | replace("\n", "<br>") | safe }}
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

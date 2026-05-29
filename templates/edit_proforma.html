@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Modificar factura proforma {{ proforma.number }}</h1>
+        <p>Al modificarla, si tenía PDF generado, tendrás que regenerarlo.</p>
+    </div>
+
+    <a class="btn" href="/proformas/{{ proforma.id }}">Volver</a>
+</div>
+
+<form class="panel form" method="post" action="/edit-proforma/{{ proforma.id }}">
+
+    <div class="form-grid">
+        <label>
+            Cliente *
+            <select name="client_id" required>
+                {% for client in clients %}
+                    <option value="{{ client.id }}" {% if proforma.client_id == client.id %}selected{% endif %}>
+                        {{ client.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Fecha *
+            <input type="date" name="proforma_date" value="{{ proforma.date }}" required>
+        </label>
+    </div>
+
+    <label>
+        Título / Obra
+        <input type="text" name="title" value="{{ proforma.title or '' }}">
+    </label>
+
+    <label>
+        Dirección de la obra
+        <textarea name="work_address" rows="2">{{ proforma.work_address or '' }}</textarea>
+    </label>
+
+    <label>
+        IVA %
+        <input type="number" name="vat_rate" value="{{ proforma.vat_rate }}" step="0.01">
+    </label>
+
+    <h2>Partidas</h2>
+
+    <div class="lines-help">
+        <strong>Mano de obra:</strong> cantidad = horas, precio = precio/hora.  
+        <strong>Material:</strong> cantidad = unidades, precio = precio/unidad.  
+        <strong>Otros:</strong> cantidad = 1 normalmente.
+    </div>
+
+    <div class="line-header">
+        <span>Tipo</span>
+        <span>Concepto / descripción</span>
+        <span>Cantidad / horas / uds.</span>
+        <span>Precio hora / unidad</span>
+        <span></span>
+    </div>
+
+    <div class="lines-box" id="lines-box">
+        {% for line in proforma.lines %}
+        <div class="line-row">
+            <select name="line_type">
+                <option value="mano_obra" {% if line.line_type == "mano_obra" %}selected{% endif %}>Mano de obra</option>
+                <option value="material" {% if line.line_type == "material" %}selected{% endif %}>Material</option>
+                <option value="otros" {% if line.line_type == "otros" %}selected{% endif %}>Otros / concepto</option>
+            </select>
+
+            <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">{{ line.description }}</textarea>
+
+            <input type="number" name="quantity" value="{{ line.quantity }}" step="0.01" placeholder="Horas / uds.">
+
+            <input type="number" name="unit_price" value="{{ line.unit_price }}" step="0.01" placeholder="€/hora o €/ud.">
+
+            <button class="btn btn-danger" type="button" onclick="this.parentElement.remove()">Quitar</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button class="btn" type="button" onclick="addLine()">Añadir partida</button>
+
+    <label>
+        Notas
+        <textarea name="notes" rows="4">{{ proforma.notes or '' }}</textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/proformas/{{ proforma.id }}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+    </div>
+
+</form>
+
+<script>
+function addLine() {
+    const box = document.getElementById("lines-box");
+    const row = document.createElement("div");
+    row.className = "line-row";
+    row.innerHTML = `
+        <select name="line_type">
+            <option value="mano_obra">Mano de obra</option>
+            <option value="material">Material</option>
+            <option value="otros">Otros / concepto</option>
+        </select>
+
+        <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros"></textarea>
+
+        <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
+
+        <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
+
+        <button class="btn btn-danger" type="button" onclick="this.parentElement.remove()">Quitar</button>
+    `;
+    box.appendChild(row);
+}
+</script>
+
+{% endblock %}

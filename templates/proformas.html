@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Facturas proforma</h1>
+        <p>Listado de proformas generadas.</p>
+    </div>
+
+    <div class="actions-row">
+        <a class="btn" href="/">Volver</a>
+        <a class="btn btn-primary" href="/new-proforma">Nueva proforma</a>
+    </div>
+</div>
+
+<div class="panel">
+    {% if proformas %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Título / Obra</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proforma in proformas %}
+                    <tr>
+                        <td><strong>{{ proforma.number }}</strong></td>
+                        <td>{{ proforma.date }}</td>
+                        <td>{{ proforma.client.name if proforma.client else "-" }}</td>
+                        <td>{{ proforma.title or "-" }}</td>
+                        <td><span class="badge">{{ proforma.status }}</span></td>
+                        <td><strong>{{ proforma.total_amount | money }}</strong></td>
+                        <td>
+                            <a class="btn btn-small" href="/proformas/{{ proforma.id }}">Ver</a>
+                            {% if proforma.status != "convertida a factura" %}
+                                <a class="btn btn-small" href="/edit-proforma/{{ proforma.id }}">Modificar</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty">
+            <h2>No hay proformas todavía</h2>
+            <p>Crea la primera factura proforma para empezar.</p>
+            <a class="btn btn-primary" href="/new-proforma">Crear proforma</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

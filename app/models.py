@@ -132,3 +132,57 @@ class InvoiceLine(Base):
     line_total = Column(Float, default=0)
 
     position = Column(Integer, default=0)
+
+
+class Proforma(Base):
+    __tablename__ = "proformas"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    number = Column(String(50), unique=True, nullable=False)
+    date = Column(Date, default=date.today)
+
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=True)
+    client = relationship("Client")
+
+    title = Column(String(255), nullable=True)
+    work_address = Column(Text, nullable=True)
+    status = Column(String(50), default="borrador")
+
+    notes = Column(Text, nullable=True)
+
+    subtotal_labor = Column(Float, default=0)
+    subtotal_materials = Column(Float, default=0)
+    subtotal_others = Column(Float, default=0)
+
+    base_amount = Column(Float, default=0)
+    vat_rate = Column(Float, default=21)
+    vat_amount = Column(Float, default=0)
+    total_amount = Column(Float, default=0)
+
+    pdf_path = Column(String(500), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    lines = relationship(
+        "ProformaLine",
+        back_populates="proforma",
+        cascade="all, delete-orphan",
+    )
+
+
+class ProformaLine(Base):
+    __tablename__ = "proforma_lines"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    proforma_id = Column(Integer, ForeignKey("proformas.id"), nullable=False)
+    proforma = relationship("Proforma", back_populates="lines")
+
+    line_type = Column(String(50), default="otros")
+    description = Column(Text, nullable=False)
+    quantity = Column(Float, default=1)
+    unit_price = Column(Float, default=0)
+    line_total = Column(Float, default=0)
+
+    position = Column(Integer, default=0)

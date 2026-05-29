@@ -90,3 +90,25 @@ def calculate_totals(lines, vat_rate=21):
         "total_amount": total_amount,
         "lines": lines,
     }
+
+
+def generate_proforma_number(db: Session):
+    year = date.today().year
+    prefix = f"PF-{year}-"
+
+    last = (
+        db.query(models.Proforma)
+        .filter(models.Proforma.number.like(f"{prefix}%"))
+        .order_by(models.Proforma.id.desc())
+        .first()
+    )
+
+    if not last:
+        next_num = 1
+    else:
+        try:
+            next_num = int(last.number.split("-")[-1]) + 1
+        except Exception:
+            next_num = 1
+
+    return f"{prefix}{next_num:04d}"

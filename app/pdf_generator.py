@@ -323,3 +323,21 @@ def generate_invoice_pdf(invoice):
     )
 
     return output_path
+
+
+def generate_proforma_pdf(proforma):
+    output_dir = os.path.join("pdf", "proformas")
+    os.makedirs(output_dir, exist_ok=True)
+
+    safe_number = proforma.number.replace("/", "-").replace("\\", "-")
+    filename = f"{safe_number}.pdf"
+    output_path = os.path.join(output_dir, filename)
+
+    _build_document_pdf(
+        document=proforma,
+        output_path=output_path,
+        title="FACTURA PROFORMA",
+        title_label="Datos de la proforma",
+    )
+
+    return output_path
