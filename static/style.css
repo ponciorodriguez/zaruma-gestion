@@ -608,3 +608,17 @@ th {
     gap: 8px;
     margin: 8px 0;
 }
+
+.app-footer {
+    margin: 40px auto 20px auto;
+    padding: 16px 24px;
+    max-width: 1180px;
+    color: #607d8b;
+    font-size: 13px;
+    text-align: center;
+    border-top: 1px solid #d9e1e5;
+}
+
+.app-footer p {
+    margin: 0;
+}
