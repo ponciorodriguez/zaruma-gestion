@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import APP_NAME
 from app.db import Base, engine
-from app.routes import clients, estimates, invoices, proformas, settings
+from app.routes import clients, estimates, invoices, materials, proformas, settings
 from app.utils import money
 
 Base.metadata.create_all(bind=engine)
@@ -15,6 +15,7 @@ app = FastAPI(title=APP_NAME)
 app.include_router(clients.router)
 app.include_router(estimates.router)
 app.include_router(invoices.router)
+app.include_router(materials.router)
 app.include_router(proformas.router)
 app.include_router(settings.router)
 

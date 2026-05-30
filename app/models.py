@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.db import Base
@@ -186,3 +186,19 @@ class ProformaLine(Base):
     line_total = Column(Float, default=0)
 
     position = Column(Integer, default=0)
+
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=True)
+    unit = Column(String(50), default="ud")
+    default_price = Column(Float, default=0)
+
+    notes = Column(Text, nullable=True)
+    active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)

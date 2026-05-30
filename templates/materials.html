@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Catálogo de materiales</h1>
+        <p>Materiales habituales para usar en presupuestos, proformas y facturas.</p>
+    </div>
+
+    <div class="actions-row">
+        <a class="btn" href="/">Volver</a>
+        <a class="btn btn-primary" href="/new-material">Nuevo material</a>
+    </div>
+</div>
+
+<div class="panel">
+    {% if materials %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Precio habitual</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for material in materials %}
+                    <tr>
+                        <td>
+                            <strong>{{ material.name }}</strong>
+                            {% if material.notes %}
+                                <br><span class="muted">{{ material.notes }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ material.category or "-" }}</td>
+                        <td>{{ material.unit or "ud" }}</td>
+                        <td><strong>{{ material.default_price | money }}</strong></td>
+                        <td>
+                            {% if material.active %}
+                                <span class="badge">Activo</span>
+                            {% else %}
+                                <span class="badge">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-small" href="/edit-material/{{ material.id }}">Modificar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty">
+            <h2>No hay materiales todavía</h2>
+            <p>Crea el primer material del catálogo.</p>
+            <a class="btn btn-primary" href="/new-material">Crear material</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

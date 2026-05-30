@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Modificar material</h1>
+        <p>{{ material.name }}</p>
+    </div>
+
+    <a class="btn" href="/materials">Volver</a>
+</div>
+
+<form class="panel form" method="post" action="/edit-material/{{ material.id }}">
+
+    <label>
+        Nombre del material *
+        <input type="text" name="name" value="{{ material.name }}" required>
+    </label>
+
+    <div class="form-grid">
+        <label>
+            Categoría
+            <input type="text" name="category" value="{{ material.category or '' }}">
+        </label>
+
+        <label>
+            Unidad
+            <input type="text" name="unit" value="{{ material.unit or 'ud' }}">
+        </label>
+    </div>
+
+    <label>
+        Precio habitual
+        <input type="number" name="default_price" value="{{ material.default_price }}" step="0.01">
+    </label>
+
+    <label>
+        Estado
+        <select name="active">
+            <option value="yes" {% if material.active %}selected{% endif %}>Activo</option>
+            <option value="no" {% if not material.active %}selected{% endif %}>Inactivo</option>
+        </select>
+    </label>
+
+    <label>
+        Observaciones
+        <textarea name="notes" rows="4">{{ material.notes or '' }}</textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/materials">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+    </div>
+
+</form>
+
+{% endblock %}

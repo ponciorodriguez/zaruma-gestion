@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Nuevo material</h1>
+        <p>Añadir material al catálogo.</p>
+    </div>
+
+    <a class="btn" href="/materials">Volver</a>
+</div>
+
+<form class="panel form" method="post" action="/materials">
+
+    <label>
+        Nombre del material *
+        <input type="text" name="name" placeholder="Ej: Cemento cola, saco 25 kg" required>
+    </label>
+
+    <div class="form-grid">
+        <label>
+            Categoría
+            <input type="text" name="category" placeholder="Ej: Albañilería, fontanería, electricidad">
+        </label>
+
+        <label>
+            Unidad
+            <input type="text" name="unit" value="ud" placeholder="ud, m2, m3, saco, ml, hora...">
+        </label>
+    </div>
+
+    <label>
+        Precio habitual
+        <input type="number" name="default_price" value="0" step="0.01">
+    </label>
+
+    <label>
+        Estado
+        <select name="active">
+            <option value="yes" selected>Activo</option>
+            <option value="no">Inactivo</option>
+        </select>
+    </label>
+
+    <label>
+        Observaciones
+        <textarea name="notes" rows="4" placeholder="Referencia, proveedor, medida, marca..."></textarea>
+    </label>
+
+    <div class="form-actions">
+        <a class="btn" href="/materials">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Guardar material</button>
+    </div>
+
+</form>
+
+{% endblock %}
