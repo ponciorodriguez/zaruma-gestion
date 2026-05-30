@@ -33,7 +33,7 @@
 
         {% if not invoice.is_rectifying %}
         <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form" onsubmit="return confirm('Vas a crear una FACTURA RECTIFICATIVA de esta factura.\n\nSe creará una nueva factura con numeración independiente R-....\n\n¿Seguro que quieres continuar?');">
-            <input type="text" name="rectification_reason" value="Anulación total de la factura original." placeholder="Motivo de rectificación">
+            <input type="text" name="rectification_reason" value="Anulación total de la factura original." placeholder="Motivo de rectificación" title="Motivo de la factura rectificativa">
             <button class="btn btn-danger" type="submit">Crear factura rectificativa</button>
         </form>
         {% endif %}

@@ -537,3 +537,23 @@ th {
 .btn-danger:hover {
     background: #8e0000;
 }
+
+/* Campo motivo factura rectificativa */
+.inline-rectifying-form input[name="rectification_reason"] {
+    min-width: 360px;
+    max-width: 560px;
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #b0bec5;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    color: #263238;
+}
+
+.inline-rectifying-form input[name="rectification_reason"]:focus {
+    outline: none;
+    border-color: #455a64;
+    box-shadow: 0 0 0 2px rgba(69, 90, 100, 0.12);
+}
