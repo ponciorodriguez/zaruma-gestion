@@ -15,3 +15,6 @@ pdf/facturas/*.pdf
 
 # Backups locales
 zaruma-data-*.tar.gz
+
+# Fotos subidas por la aplicación
+uploads/
