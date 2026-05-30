@@ -9,7 +9,12 @@ from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
 from app.pdf_generator import generate_invoice_pdf
-from app.utils import calculate_totals, generate_invoice_number, money
+from app.utils import (
+    calculate_totals,
+    generate_invoice_number,
+    generate_rectifying_invoice_number,
+    money,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -75,6 +80,7 @@ def create_invoice(
         work_address=work_address,
         notes=notes,
         status="pendiente",
+        is_rectifying=False,
         subtotal_labor=totals["subtotal_labor"],
         subtotal_materials=totals["subtotal_materials"],
         subtotal_others=totals["subtotal_others"],
@@ -228,6 +234,7 @@ def mark_invoice_sent_route(
 @router.post("/invoices/{invoice_id}/create-rectifying")
 def create_rectifying_invoice_route(
     invoice_id: int,
+    rectification_reason: str = Form("Anulación total de la factura original."),
     db: Session = Depends(get_db),
 ):
     original = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
@@ -236,14 +243,21 @@ def create_rectifying_invoice_route(
         return RedirectResponse(url="/invoices", status_code=303)
 
     rectifying = models.Invoice(
-        number=generate_invoice_number(db),
+        number=generate_rectifying_invoice_number(db),
         date=date.today(),
         client_id=original.client_id,
         estimate_id=None,
         title=f"Factura rectificativa de {original.number}",
         work_address=original.work_address,
-        notes=f"Factura rectificativa de la factura nº {original.number}.",
+        notes=(
+            f"Factura rectificativa de la factura nº {original.number}.\n\n"
+            f"Motivo de rectificación: {rectification_reason}"
+        ),
         status="pendiente",
+        is_rectifying=True,
+        rectifies_invoice_number=original.number,
+        rectifies_invoice_date=original.date,
+        rectification_reason=rectification_reason,
         subtotal_labor=-abs(original.subtotal_labor or 0),
         subtotal_materials=-abs(original.subtotal_materials or 0),
         subtotal_others=-abs(original.subtotal_others or 0),

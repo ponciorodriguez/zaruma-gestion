@@ -108,6 +108,12 @@ class Invoice(Base):
 
     pdf_path = Column(String(500), nullable=True)
 
+    is_rectifying = Column(Boolean, default=False)
+    rectifies_invoice_number = Column(String(50), nullable=True)
+    rectifies_invoice_date = Column(Date, nullable=True)
+    rectification_reason = Column(Text, nullable=True)
+
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     lines = relationship(

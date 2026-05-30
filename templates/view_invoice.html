@@ -29,9 +29,12 @@
             <span class="badge">Factura enviada: edición bloqueada</span>
         {% endif %}
 
-        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" style="display:inline;">
+        {% if not invoice.is_rectifying %}
+        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form">
+            <input type="text" name="rectification_reason" value="Anulación total de la factura original." placeholder="Motivo de rectificación">
             <button class="btn" type="submit">Crear factura rectificativa</button>
         </form>
+        {% endif %}
 
         <a class="btn" href="/invoices">Volver</a>
     </div>
@@ -54,6 +57,12 @@
             <p><strong>Número:</strong> {{ invoice.number }}</p>
             <p><strong>Fecha:</strong> {{ invoice.date }}</p>
             <p><strong>Estado:</strong> {{ invoice.status }}</p>
+            {% if invoice.is_rectifying %}
+                <p><strong>Tipo:</strong> Factura rectificativa</p>
+                <p><strong>Rectifica factura:</strong> {{ invoice.rectifies_invoice_number or "-" }}</p>
+                <p><strong>Fecha factura rectificada:</strong> {{ invoice.rectifies_invoice_date or "-" }}</p>
+                <p><strong>Motivo:</strong> {{ invoice.rectification_reason or "-" }}</p>
+            {% endif %}
             <p><strong>Obra:</strong> {{ invoice.title or "-" }}</p>
             <p><strong>Dirección obra:</strong> {{ invoice.work_address or "-" }}</p>
             {% if invoice.pdf_path %}

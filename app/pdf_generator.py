@@ -114,6 +114,14 @@ def _document_data_block(document, styles, title_label):
         f"Estado: {document.status}",
     ]
 
+    if getattr(document, "is_rectifying", False):
+        lines.append("<b>Factura rectificada</b>")
+        lines.append(f"Número: {getattr(document, 'rectifies_invoice_number', '') or '-'}")
+        rectified_date = getattr(document, 'rectifies_invoice_date', None)
+        lines.append(f"Fecha: {rectified_date.strftime('%d/%m/%Y') if rectified_date else '-'}")
+        reason = getattr(document, 'rectification_reason', '') or '-'
+        lines.append(f"Motivo: {_safe_text(reason).replace(chr(10), '<br/>')}")
+
     if document.title:
         lines.append(f"Obra: {document.title}")
 
@@ -315,11 +323,18 @@ def generate_invoice_pdf(invoice):
     filename = f"{safe_number}.pdf"
     output_path = os.path.join(INVOICES_PDF_DIR, filename)
 
+    if getattr(invoice, "is_rectifying", False):
+        title = "FACTURA RECTIFICATIVA"
+        title_label = "Datos de la factura rectificativa"
+    else:
+        title = "FACTURA"
+        title_label = "Datos de la factura"
+
     _build_document_pdf(
         document=invoice,
         output_path=output_path,
-        title="FACTURA",
-        title_label="Datos de la factura",
+        title=title,
+        title_label=title_label,
     )
 
     return output_path

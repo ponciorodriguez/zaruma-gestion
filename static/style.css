@@ -492,3 +492,16 @@ th {
 .instructions-page li {
     margin-bottom: 6px;
 }
+
+.inline-rectifying-form {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.inline-rectifying-form input {
+    min-width: 260px;
+    padding: 8px 10px;
+    border: 1px solid #cfd8dc;
+    border-radius: 7px;
+}
