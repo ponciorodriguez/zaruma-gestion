@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Instrucciones de uso</h1>
+        <p>Guía rápida para usar Zaruma Gestión.</p>
+    </div>
+
+    <a class="btn" href="/">Volver</a>
+</div>
+
+<div class="panel document-view instructions-page">
+
+    <h2>1. Acceso a la aplicación</h2>
+    <p>
+        La aplicación está protegida por Cloudflare Access. Solo pueden entrar los emails autorizados.
+        Una vez dentro, cualquier usuario autorizado puede usar todas las funciones de la aplicación.
+    </p>
+
+    <div class="notes-box">
+        <strong>Importante:</strong> no hay usuarios ni permisos internos dentro de Zaruma Gestión.
+        Si una persona tiene acceso por Cloudflare, puede crear, modificar y generar documentos.
+    </div>
+
+    <h2>2. Clientes</h2>
+    <p>
+        Antes de crear presupuestos, proformas o facturas, conviene crear el cliente.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Clientes</strong>.</li>
+        <li>Pulsar <strong>Nuevo cliente</strong>.</li>
+        <li>Rellenar nombre, NIF/CIF, dirección, teléfono y email si se conocen.</li>
+        <li>Guardar.</li>
+    </ol>
+
+    <p>
+        Los clientes se pueden modificar desde el botón <strong>Modificar</strong>.
+    </p>
+
+    <h2>3. Catálogo de materiales</h2>
+    <p>
+        El catálogo sirve para guardar materiales habituales con su precio orientativo.
+        Después se pueden seleccionar directamente al crear una partida.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Materiales</strong>.</li>
+        <li>Pulsar <strong>Nuevo material</strong>.</li>
+        <li>Indicar nombre, categoría, unidad y precio habitual.</li>
+        <li>Guardar.</li>
+    </ol>
+
+    <p>
+        Al crear un presupuesto, proforma o factura, se puede seleccionar un material del catálogo.
+        La aplicación rellenará automáticamente el tipo, concepto y precio.
+    </p>
+
+    <h2>4. Presupuestos</h2>
+    <p>
+        Los presupuestos sirven para preparar una oferta antes de emitir una factura.
+        Se autonumeran automáticamente.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Presupuestos</strong>.</li>
+        <li>Pulsar <strong>Nuevo presupuesto</strong>.</li>
+        <li>Seleccionar cliente y fecha.</li>
+        <li>Rellenar título u obra, dirección y notas si hace falta.</li>
+        <li>Añadir partidas de mano de obra, materiales u otros conceptos.</li>
+        <li>Guardar presupuesto.</li>
+        <li>Desde la vista del presupuesto, pulsar <strong>Generar PDF</strong>.</li>
+    </ol>
+
+    <p>
+        Un presupuesto se puede modificar mientras se necesite. Si ya tenía PDF generado y se modifica,
+        se deberá pulsar otra vez <strong>Generar PDF</strong> o <strong>Regenerar PDF</strong>.
+    </p>
+
+    <h3>Convertir presupuesto en factura</h3>
+    <p>
+        Desde la vista del presupuesto se puede pulsar <strong>Convertir en factura</strong>.
+        La aplicación creará una factura nueva copiando cliente, partidas, importes y notas.
+    </p>
+
+    <div class="notes-box">
+        Convertir un presupuesto en factura no borra el presupuesto original.
+        El presupuesto quedará marcado como convertido a factura.
+    </div>
+
+    <h2>5. Facturas proforma</h2>
+    <p>
+        Las facturas proforma son documentos informativos o previos a la factura final.
+        No sustituyen a una factura fiscal definitiva.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Proformas</strong>.</li>
+        <li>Pulsar <strong>Nueva proforma</strong>.</li>
+        <li>Seleccionar cliente y rellenar los datos.</li>
+        <li>Añadir partidas.</li>
+        <li>Guardar.</li>
+        <li>Generar PDF.</li>
+    </ol>
+
+    <p>
+        Las proformas tienen su propia numeración automática, independiente de las facturas.
+    </p>
+
+    <h3>Convertir proforma en factura</h3>
+    <p>
+        Desde una proforma se puede pulsar <strong>Convertir en factura</strong>.
+        La aplicación creará una factura nueva copiando los datos de la proforma.
+    </p>
+
+    <div class="notes-box">
+        La proforma original no se borra. Quedará marcada como convertida a factura.
+    </div>
+
+    <h2>6. Facturas</h2>
+    <p>
+        Las facturas se autonumeran automáticamente y tienen numeración independiente.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Facturas</strong>.</li>
+        <li>Pulsar <strong>Nueva factura</strong>.</li>
+        <li>Seleccionar cliente y fecha.</li>
+        <li>Añadir partidas.</li>
+        <li>Guardar factura.</li>
+        <li>Generar PDF.</li>
+    </ol>
+
+    <h3>Modificar facturas</h3>
+    <p>
+        Una factura se puede modificar mientras esté en estado pendiente.
+        Si se modifica una factura que ya tenía PDF, hay que regenerar el PDF.
+    </p>
+
+    <h3>Marcar como enviada</h3>
+    <p>
+        Cuando una factura ya se ha enviado al cliente, se puede pulsar
+        <strong>Marcar como enviada</strong>.
+    </p>
+
+    <div class="notes-box">
+        Una factura marcada como enviada queda bloqueada para modificación.
+        Esto evita cambiar accidentalmente una factura ya entregada.
+    </div>
+
+    <h2>7. Facturas rectificativas</h2>
+    <p>
+        Desde una factura se puede crear una <strong>factura rectificativa</strong>.
+        La aplicación genera una nueva factura con importes negativos para rectificar la factura original.
+    </p>
+
+    <ol>
+        <li>Entrar en <strong>Facturas</strong>.</li>
+        <li>Abrir la factura que se quiere rectificar.</li>
+        <li>Pulsar <strong>Crear factura rectificativa</strong>.</li>
+        <li>Revisar la nueva factura generada.</li>
+        <li>Generar PDF.</li>
+    </ol>
+
+    <div class="notes-box">
+        Antes de usar una rectificativa para documentación fiscal real, conviene revisar que los datos,
+        importes y concepto sean correctos.
+    </div>
+
+    <h2>8. Partidas</h2>
+    <p>
+        En presupuestos, proformas y facturas las partidas se dividen en:
+    </p>
+
+    <ul>
+        <li><strong>Mano de obra:</strong> normalmente cantidad = horas y precio = precio/hora.</li>
+        <li><strong>Material:</strong> normalmente cantidad = unidades y precio = precio/unidad.</li>
+        <li><strong>Otros / concepto:</strong> para conceptos libres, desplazamientos, portes, etc.</li>
+    </ul>
+
+    <p>
+        El campo de descripción permite varias líneas. Se puede usar para explicar mejor el trabajo realizado
+        o los materiales incluidos.
+    </p>
+
+    <h2>9. PDFs</h2>
+    <p>
+        Cada documento puede generar su PDF desde el botón <strong>Generar PDF</strong>.
+        Si el documento ya tenía un PDF, el botón aparecerá como <strong>Regenerar PDF</strong>.
+    </p>
+
+    <p>
+        Los PDFs usan la cabecera de Zaruma configurada en la aplicación.
+    </p>
+
+    <h2>10. Configuración</h2>
+    <p>
+        En <strong>Configuración</strong> se pueden revisar los datos generales de empresa y la cabecera
+        que se usa en los PDFs.
+    </p>
+
+    <h2>11. Recomendaciones de uso</h2>
+
+    <ul>
+        <li>Crear primero el cliente.</li>
+        <li>Guardar los materiales habituales en el catálogo.</li>
+        <li>Revisar bien las partidas antes de generar el PDF.</li>
+        <li>Si se modifica un documento, regenerar el PDF.</li>
+        <li>No marcar una factura como enviada hasta estar seguro de que está correcta.</li>
+        <li>Usar factura rectificativa si hay que corregir una factura ya entregada.</li>
+    </ul>
+
+</div>
+
+{% endblock %}

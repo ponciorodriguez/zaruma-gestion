@@ -468,3 +468,27 @@ th {
         grid-template-columns: 1fr;
     }
 }
+
+.instructions-page {
+    line-height: 1.65;
+}
+
+.instructions-page h2 {
+    margin-top: 28px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 6px;
+}
+
+.instructions-page h3 {
+    margin-top: 20px;
+    color: #37474f;
+}
+
+.instructions-page ol,
+.instructions-page ul {
+    padding-left: 24px;
+}
+
+.instructions-page li {
+    margin-bottom: 6px;
+}
