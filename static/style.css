@@ -505,3 +505,35 @@ th {
     border: 1px solid #cfd8dc;
     border-radius: 7px;
 }
+
+/* Botón/formulario de factura rectificativa */
+.inline-rectifying-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.inline-rectifying-form input {
+    min-width: 320px;
+    max-width: 520px;
+    flex: 1;
+    padding: 9px 10px;
+    border: 1px solid #cfd8dc;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+.actions-row {
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: #b71c1c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #8e0000;
+}

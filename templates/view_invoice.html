@@ -29,14 +29,14 @@
             <span class="badge">Factura enviada: edición bloqueada</span>
         {% endif %}
 
+        <a class="btn" href="/invoices">Volver</a>
+
         {% if not invoice.is_rectifying %}
-        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form">
+        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form" onsubmit="return confirm('Vas a crear una FACTURA RECTIFICATIVA de esta factura.\n\nSe creará una nueva factura con numeración independiente R-....\n\n¿Seguro que quieres continuar?');">
             <input type="text" name="rectification_reason" value="Anulación total de la factura original." placeholder="Motivo de rectificación">
-            <button class="btn" type="submit">Crear factura rectificativa</button>
+            <button class="btn btn-danger" type="submit">Crear factura rectificativa</button>
         </form>
         {% endif %}
-
-        <a class="btn" href="/invoices">Volver</a>
     </div>
 </div>
 
