@@ -60,6 +60,13 @@ class Estimate(Base):
         cascade="all, delete-orphan",
     )
 
+    photos = relationship(
+        "EstimatePhoto",
+        back_populates="estimate",
+        cascade="all, delete-orphan",
+        order_by="EstimatePhoto.position",
+    )
+
 
 class EstimateLine(Base):
     __tablename__ = "estimate_lines"
@@ -207,4 +214,20 @@ class Material(Base):
     notes = Column(Text, nullable=True)
     active = Column(Boolean, default=True)
 
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class EstimatePhoto(Base):
+    __tablename__ = "estimate_photos"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    estimate_id = Column(Integer, ForeignKey("estimates.id"), nullable=False)
+    estimate = relationship("Estimate", back_populates="photos")
+
+    file_path = Column(String(500), nullable=False)
+    caption = Column(Text, nullable=True)
+    include_in_report = Column(Boolean, default=True)
+
+    position = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)

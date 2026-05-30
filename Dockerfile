@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/data /app/pdf/presupuestos /app/pdf/facturas
+RUN mkdir -p /app/data /app/pdf/presupuestos /app/pdf/facturas /app/uploads/estimate_photos
 
 EXPOSE 8000
 

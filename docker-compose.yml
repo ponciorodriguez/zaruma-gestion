@@ -10,4 +10,5 @@ services:
     volumes:
       - ./data:/app/data
       - ./pdf:/app/pdf
+      - ./uploads:/app/uploads
       - ./static/pdf_header.png:/app/static/pdf_header.png:ro

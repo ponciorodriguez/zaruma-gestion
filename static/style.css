@@ -557,3 +557,54 @@ th {
     border-color: #455a64;
     box-shadow: 0 0 0 2px rgba(69, 90, 100, 0.12);
 }
+
+.photo-upload-box {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    flex-wrap: wrap;
+    background: #f5f7f8;
+    border: 1px solid #d9e1e5;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 18px;
+}
+
+.photo-upload-box input[type="file"] {
+    display: block;
+    margin-top: 6px;
+}
+
+.estimate-photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.estimate-photo-card {
+    background: white;
+    border: 1px solid #d9e1e5;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.estimate-photo-card img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.estimate-photo-card textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
