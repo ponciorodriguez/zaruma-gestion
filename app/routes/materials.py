@@ -117,3 +117,25 @@ def update_material(
     db.commit()
 
     return RedirectResponse(url="/materials", status_code=303)
+
+
+@router.get("/api/materials")
+def api_materials(db: Session = Depends(get_db)):
+    materials = (
+        db.query(models.Material)
+        .filter(models.Material.active == True)
+        .order_by(models.Material.category.asc(), models.Material.name.asc())
+        .all()
+    )
+
+    return [
+        {
+            "id": material.id,
+            "name": material.name,
+            "category": material.category or "",
+            "unit": material.unit or "ud",
+            "default_price": material.default_price or 0,
+            "notes": material.notes or "",
+        }
+        for material in materials
+    ]

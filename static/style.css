@@ -449,3 +449,22 @@ th {
     object-fit: contain;
     margin: 0 auto;
 }
+
+/* Selector de catálogo de materiales en partidas */
+.line-header {
+    grid-template-columns: 170px 140px minmax(220px, 1fr) 130px 140px 80px;
+}
+
+.line-row {
+    grid-template-columns: 170px 140px minmax(220px, 1fr) 130px 140px 80px;
+}
+
+.material-picker {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .line-row {
+        grid-template-columns: 1fr;
+    }
+}
