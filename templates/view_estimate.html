@@ -98,6 +98,52 @@
     </div>
     {% endif %}
 
+    <h2 id="reporte-fotografico">Reporte fotográfico</h2>
+
+    <div class="notes-box">
+        <p>
+            Adjunta fotos del trabajo si quieres que aparezcan al final del PDF como anexo fotográfico.
+            Las fotos marcadas como <strong>Incluir en PDF</strong> se añadirán en hojas aparte.
+        </p>
+    </div>
+
+    <form class="photo-upload-box" method="post" action="/estimates/{{ estimate.id }}/photos" enctype="multipart/form-data">
+        <label>
+            Añadir fotos al presupuesto
+            <input type="file" name="photos" accept="image/*" multiple>
+        </label>
+
+        <button class="btn btn-primary" type="submit">Subir fotos</button>
+    </form>
+
+    {% if estimate.photos %}
+        <div class="estimate-photos-grid">
+            {% for photo in estimate.photos %}
+            <div class="estimate-photo-card">
+                <img src="/{{ photo.file_path }}" alt="Foto presupuesto">
+
+                <form method="post" action="/estimate-photos/{{ photo.id }}/update">
+                    <label>
+                        Descripción de la foto
+                        <textarea name="caption" rows="2" placeholder="Ej: Estado previo de la zona">{{ photo.caption or "" }}</textarea>
+                    </label>
+
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="include_in_report" value="yes" {% if photo.include_in_report %}checked{% endif %}>
+                        Incluir en PDF
+                    </label>
+
+                    <button class="btn btn-small" type="submit">Guardar foto</button>
+                </form>
+
+                <form method="post" action="/estimate-photos/{{ photo.id }}/delete" onsubmit="return confirm('¿Seguro que quieres borrar esta foto?');">
+                    <button class="btn btn-small btn-danger" type="submit">Borrar foto</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
 </div>
 
 {% endblock %}

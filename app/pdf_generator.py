@@ -7,6 +7,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     Image,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -296,6 +297,9 @@ def _build_document_pdf(document, output_path, title, title_label):
         story.append(Paragraph(_safe_text(document.notes).replace("\n", "<br/>"), styles["Small"]))
 
 
+    if title == "PRESUPUESTO":
+        story.extend(_photo_report_elements(document, styles))
+
     pdf.build(story)
 
 
@@ -356,3 +360,77 @@ def generate_proforma_pdf(proforma):
     )
 
     return output_path
+
+
+def _photo_report_elements(document, styles):
+    photos = [
+        photo for photo in getattr(document, "photos", [])
+        if getattr(photo, "include_in_report", False) and os.path.exists(getattr(photo, "file_path", ""))
+    ]
+
+    if not photos:
+        return []
+
+    elements = [
+        PageBreak(),
+        Paragraph("<b>ANEXO FOTOGRÁFICO</b>", styles["Heading2"]),
+        Spacer(1, 6 * mm),
+    ]
+
+    rows = []
+    current_row = []
+
+    for photo in photos:
+        img = Image(photo.file_path)
+
+        max_width = 82 * mm
+        max_height = 70 * mm
+
+        ratio = min(
+            max_width / float(img.imageWidth),
+            max_height / float(img.imageHeight),
+        )
+
+        img.drawWidth = img.imageWidth * ratio
+        img.drawHeight = img.imageHeight * ratio
+
+        caption = getattr(photo, "caption", "") or ""
+        cell_content = [
+            img,
+            Spacer(1, 3 * mm),
+            Paragraph(_safe_text(caption).replace("\n", "<br/>"), styles["Small"]),
+        ]
+
+        current_row.append(cell_content)
+
+        if len(current_row) == 2:
+            rows.append(current_row)
+            current_row = []
+
+    if current_row:
+        current_row.append("")
+        rows.append(current_row)
+
+    table = Table(
+        rows,
+        colWidths=[90 * mm, 90 * mm],
+        hAlign="CENTER",
+    )
+
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("BOX", (0, 0), (-1, -1), 0.25, colors.HexColor("#CFD8DC")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CFD8DC")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+
+    elements.append(table)
+
+    return elements
