@@ -1,40 +1,53 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Run Zaruma Gestión",
-            "type": "shell",
-            "command": "./run.sh",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "dedicated",
-                "clear": true
-            }
-        },
-        {
-            "label": "Git Status",
-            "type": "shell",
-            "command": "git status",
-            "problemMatcher": []
-        },
-        {
-            "label": "Git Pull Develop",
-            "type": "shell",
-            "command": "git checkout develop && git pull origin develop",
-            "problemMatcher": []
-        },
-        {
-            "label": "Git Push Develop",
-            "type": "shell",
-            "command": "git status && git add . && git commit -m \"update zaruma gestion\" && git push",
-            "problemMatcher": []
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Zaruma Local",
+      "type": "shell",
+      "command": "./run.sh",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Deploy Zaruma",
+      "type": "shell",
+      "command": "ssh sat 'cd /home/jefe/proyectos/zaruma-gestion && git pull origin develop && docker compose up -d --build && docker compose ps'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Logs Zaruma",
+      "type": "shell",
+      "command": "ssh sat 'cd /home/jefe/proyectos/zaruma-gestion && docker compose logs -f zaruma'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Status Zaruma Server",
+      "type": "shell",
+      "command": "ssh sat 'cd /home/jefe/proyectos/zaruma-gestion && git status && docker compose ps'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ]
 }
