@@ -291,6 +291,15 @@ def _build_document_pdf(document, output_path, title, title_label):
 
     story.append(_totals_table(document))
 
+    if title == "FACTURA PROFORMA":
+        story.append(Spacer(1, 5 * mm))
+        story.append(
+            Paragraph(
+                "<b>Esta factura proforma no lleva el IVA incluido.</b>",
+                styles["Small"],
+            )
+        )
+
     if document.notes:
         story.append(Spacer(1, 8 * mm))
         story.append(Paragraph("<b>Notas / condiciones</b>", styles["Heading3"]))

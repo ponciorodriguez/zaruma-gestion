@@ -41,10 +41,11 @@
         <textarea name="work_address" rows="2">{{ proforma.work_address or '' }}</textarea>
     </label>
 
-    <label>
-        IVA %
-        <input type="number" name="vat_rate" value="{{ proforma.vat_rate }}" step="0.01">
-    </label>
+    <input type="hidden" name="vat_rate" value="0">
+
+    <div class="notes-box">
+        Esta factura proforma no lleva el IVA incluido.
+    </div>
 
     <h2>Partidas</h2>
 

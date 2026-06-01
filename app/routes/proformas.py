@@ -65,7 +65,7 @@ def create_proforma(
     db: Session = Depends(get_db),
 ):
     lines_data = _build_lines_data(line_type, description, quantity, unit_price)
-    totals = calculate_totals(lines_data, vat_rate)
+    totals = calculate_totals(lines_data, 0)
 
     proforma = models.Proforma(
         number=generate_proforma_number(db),
@@ -79,7 +79,7 @@ def create_proforma(
         subtotal_materials=totals["subtotal_materials"],
         subtotal_others=totals["subtotal_others"],
         base_amount=totals["base_amount"],
-        vat_rate=totals["vat_rate"],
+        vat_rate=0,
         vat_amount=totals["vat_amount"],
         total_amount=totals["total_amount"],
     )
@@ -161,7 +161,7 @@ def update_proforma(
         return RedirectResponse(url="/proformas", status_code=303)
 
     lines_data = _build_lines_data(line_type, description, quantity, unit_price)
-    totals = calculate_totals(lines_data, vat_rate)
+    totals = calculate_totals(lines_data, 0)
 
     proforma.date = date.fromisoformat(proforma_date)
     proforma.client_id = client_id
@@ -172,6 +172,7 @@ def update_proforma(
     proforma.subtotal_materials = totals["subtotal_materials"]
     proforma.subtotal_others = totals["subtotal_others"]
     proforma.base_amount = totals["base_amount"]
+    proforma.vat_rate = 0
     proforma.vat_rate = totals["vat_rate"]
     proforma.vat_amount = totals["vat_amount"]
     proforma.total_amount = totals["total_amount"]
