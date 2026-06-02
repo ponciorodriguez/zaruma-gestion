@@ -5,6 +5,8 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
     Image,
     PageBreak,
@@ -54,21 +56,74 @@ def _ensure_dirs():
     os.makedirs(INVOICES_PDF_DIR, exist_ok=True)
 
 
+
+
+class HeaderFooterCanvas(Canvas):
+    def __init__(self, *args, header_path="static/pdf_header.png", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.header_path = header_path
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        page_count = len(self._saved_page_states)
+
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self._draw_header_footer(page_count)
+            super().showPage()
+
+        super().save()
+
+    def _draw_header_footer(self, page_count):
+        self.saveState()
+
+        page_width, page_height = A4
+
+        if self.header_path and os.path.exists(self.header_path):
+            try:
+                image = ImageReader(self.header_path)
+                image_width, image_height = image.getSize()
+
+                max_width = 186 * mm
+                ratio = image_height / float(image_width)
+                draw_width = max_width
+                draw_height = max_width * ratio
+
+                x = (page_width - draw_width) / 2
+                y = page_height - 8 * mm - draw_height
+
+                self.drawImage(
+                    self.header_path,
+                    x,
+                    y,
+                    width=draw_width,
+                    height=draw_height,
+                    preserveAspectRatio=True,
+                    mask="auto",
+                )
+            except Exception:
+                pass
+
+        self.setFont("Helvetica", 8)
+        self.setFillColor(colors.HexColor("#607D8B"))
+        self.drawRightString(
+            page_width - 12 * mm,
+            8 * mm,
+            f"Página {self._pageNumber} de {page_count}",
+        )
+
+        self.restoreState()
+
+
+def _canvas_maker(*args, **kwargs):
+    return HeaderFooterCanvas(*args, **kwargs)
+
 def _header_elements(title, document, styles):
     elements = []
-    header_path = "static/pdf_header.png"
-
-    if os.path.exists(header_path):
-        img = Image(header_path)
-
-        max_width = 186 * mm
-        ratio = img.imageHeight / float(img.imageWidth)
-
-        img.drawWidth = max_width
-        img.drawHeight = max_width * ratio
-
-        elements.append(img)
-        elements.append(Spacer(1, 6 * mm))
 
     title_table = Table(
         [[
@@ -266,7 +321,7 @@ def _build_document_pdf(document, output_path, title, title_label):
         pagesize=A4,
         rightMargin=12 * mm,
         leftMargin=12 * mm,
-        topMargin=10 * mm,
+        topMargin=42 * mm,
         bottomMargin=14 * mm,
     )
 
@@ -324,7 +379,7 @@ def _build_document_pdf(document, output_path, title, title_label):
     if title == "PRESUPUESTO":
         story.extend(_photo_report_elements(document, styles))
 
-    pdf.build(story)
+    pdf.build(story, canvasmaker=_canvas_maker)
 
 
 def generate_estimate_pdf(estimate):
