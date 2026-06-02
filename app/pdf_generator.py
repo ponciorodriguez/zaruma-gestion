@@ -28,6 +28,21 @@ def _money(value):
         return "0,00 €"
 
 
+def _empty_if_zero(value, money=False):
+    try:
+        number = float(value or 0)
+    except Exception:
+        return ""
+
+    if number == 0:
+        return ""
+
+    if money:
+        return _money(number)
+
+    return f"{number:g}"
+
+
 def _safe_text(value):
     if value is None:
         return ""
@@ -148,9 +163,9 @@ def _lines_table(lines, styles):
             [
                 line_type,
                 Paragraph(_safe_text(line.description).replace("\n", "<br/>"), styles["Small"]),
-                f"{line.quantity:g}",
-                _money(line.unit_price),
-                _money(line.line_total),
+                _empty_if_zero(line.quantity),
+                _empty_if_zero(line.unit_price, money=True),
+                _empty_if_zero(line.line_total, money=True),
             ]
         )
 
