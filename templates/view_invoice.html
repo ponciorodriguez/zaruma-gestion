@@ -10,7 +10,7 @@
 
     <div class="actions-row">
         {% if invoice.pdf_path %}
-            <a class="btn btn-primary" href="/{{ invoice.pdf_path }}" target="_blank">Ver PDF</a>
+            <a class="btn btn-primary" href="/{{ invoice.pdf_path }}?v={{ range(1, 9999999) | random }}" target="_blank">Ver PDF</a>
         {% endif %}
 
         <form method="post" action="/invoices/{{ invoice.id }}/generate-pdf" style="display:inline;">
