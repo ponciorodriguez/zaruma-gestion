@@ -58,69 +58,55 @@ def _ensure_dirs():
 
 
 
-class HeaderFooterCanvas(Canvas):
-    def __init__(self, *args, header_path="static/pdf_header.png", **kwargs):
-        super().__init__(*args, **kwargs)
-        self.header_path = header_path
-        self._saved_page_states = []
-
-    def showPage(self):
-        self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
-
-    def save(self):
-        page_count = len(self._saved_page_states)
-
-        for state in self._saved_page_states:
-            self.__dict__.update(state)
-            self._draw_header_footer(page_count)
-            super().showPage()
-
-        super().save()
-
-    def _draw_header_footer(self, page_count):
-        self.saveState()
-
-        page_width, page_height = A4
-
-        if self.header_path and os.path.exists(self.header_path):
-            try:
-                image = ImageReader(self.header_path)
-                image_width, image_height = image.getSize()
-
-                max_width = 186 * mm
-                ratio = image_height / float(image_width)
-                draw_width = max_width
-                draw_height = max_width * ratio
-
-                x = (page_width - draw_width) / 2
-                y = page_height - 8 * mm - draw_height
-
-                self.drawImage(
-                    self.header_path,
-                    x,
-                    y,
-                    width=draw_width,
-                    height=draw_height,
-                    preserveAspectRatio=True,
-                    mask="auto",
-                )
-            except Exception:
-                pass
-
-        self.setFont("Helvetica", 8)
-        self.setFillColor(colors.HexColor("#607D8B"))
-        self.drawRightString(
-            page_width - 12 * mm,
-            8 * mm,
-            f"Página {self._pageNumber} de {page_count}",
-        )
-
-        self.restoreState()
 
 
-def _canvas_maker(*args, **kwargs):
-    return HeaderFooterCanvas(*args, **kwargs)
+
+def _draw_page_header_footer(canvas, doc):
+    canvas.saveState()
+
+    page_width, page_height = A4
+
+    # Ruta absoluta: /app/static/pdf_header.png dentro de Docker,
+    # o static/pdf_header.png en local.
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    header_path = os.path.join(base_dir, "static", "pdf_header.png")
+
+    if os.path.exists(header_path):
+        try:
+            image = ImageReader(header_path)
+            image_width, image_height = image.getSize()
+
+            max_width = 186 * mm
+            ratio = image_height / float(image_width)
+            draw_width = max_width
+            draw_height = max_width * ratio
+
+            x = (page_width - draw_width) / 2
+            y = page_height - 8 * mm - draw_height
+
+            canvas.drawImage(
+                header_path,
+                x,
+                y,
+                width=draw_width,
+                height=draw_height,
+                preserveAspectRatio=True,
+                mask="auto",
+            )
+        except Exception:
+            pass
+
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(colors.HexColor("#607D8B"))
+    canvas.drawRightString(
+        page_width - 12 * mm,
+        8 * mm,
+        f"Página {canvas.getPageNumber()}",
+    )
+
+    canvas.restoreState()
+
+
 
 def _header_elements(title, document, styles):
     elements = []
@@ -321,7 +307,7 @@ def _build_document_pdf(document, output_path, title, title_label):
         pagesize=A4,
         rightMargin=12 * mm,
         leftMargin=12 * mm,
-        topMargin=42 * mm,
+        topMargin=58 * mm,
         bottomMargin=14 * mm,
     )
 
@@ -379,7 +365,7 @@ def _build_document_pdf(document, output_path, title, title_label):
     if title == "PRESUPUESTO":
         story.extend(_photo_report_elements(document, styles))
 
-    pdf.build(story, canvasmaker=_canvas_maker)
+    pdf.build(story, onFirstPage=_draw_page_header_footer, onLaterPages=_draw_page_header_footer)
 
 
 def generate_estimate_pdf(estimate):
