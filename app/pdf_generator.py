@@ -200,7 +200,6 @@ def _split_long_text(value, max_chars=320):
         line = raw_line.strip()
 
         if not line:
-            chunks.append("")
             continue
 
         words = line.split()
