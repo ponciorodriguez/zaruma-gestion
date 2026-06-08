@@ -188,6 +188,39 @@ def _document_data_block(document, styles, title_label):
     return Paragraph("<br/>".join(lines), styles["Small"])
 
 
+def _split_long_text(value, max_chars=320):
+    text = _safe_text(value).strip()
+
+    if not text:
+        return [""]
+
+    chunks = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+
+        if not line:
+            chunks.append("")
+            continue
+
+        words = line.split()
+        current = ""
+
+        for word in words:
+            if not current:
+                current = word
+            elif len(current) + 1 + len(word) <= max_chars:
+                current += " " + word
+            else:
+                chunks.append(current)
+                current = word
+
+        if current:
+            chunks.append(current)
+
+    return chunks or [""]
+
+
 def _lines_table(lines, styles):
     data = [
         ["Tipo", "Descripción", "Cantidad", "Precio unit.", "Total"]
@@ -197,41 +230,56 @@ def _lines_table(lines, styles):
         line_type = {
             "mano_obra": "Mano de obra",
             "material": "Material",
+            "texto": "",
             "partida": "Partida",
             "otros": "Otros",
         }.get(line.line_type, line.line_type)
 
-        data.append(
-            [
-                line_type,
-                Paragraph(_safe_text(line.description).replace("\n", "<br/>"), styles["Small"]),
-                _empty_if_zero(line.quantity),
-                _empty_if_zero(line.unit_price, money=True),
-                _empty_if_zero(line.line_total, money=True),
-            ]
-        )
+        chunks = _split_long_text(line.description)
+
+        for idx, chunk in enumerate(chunks):
+            if idx == 0:
+                row_type = line_type
+                row_quantity = _empty_if_zero(line.quantity)
+                row_unit_price = _empty_if_zero(line.unit_price, money=True)
+                row_total = _empty_if_zero(line.line_total, money=True)
+            else:
+                row_type = ""
+                row_quantity = ""
+                row_unit_price = ""
+                row_total = ""
+
+            data.append(
+                [
+                    row_type,
+                    Paragraph(_safe_text(chunk).replace("\n", "<br/>"), styles["Small"]),
+                    row_quantity,
+                    row_unit_price,
+                    row_total,
+                ]
+            )
 
     table = Table(
         data,
-        colWidths=[27 * mm, 82 * mm, 22 * mm, 29 * mm, 29 * mm],
+        colWidths=[25 * mm, 86 * mm, 22 * mm, 31 * mm, 26 * mm],
         repeatRows=1,
+        splitByRow=1,
     )
 
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#263238")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#ECEFF1")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#263238")),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                 ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#B0BEC5")),
+                ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CFD8DC")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F5F5")]),
-                ("LEFTPADDING", (0, 0), (-1, -1), 5),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-                ("TOPPADDING", (0, 0), (-1, -1), 5),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ]
         )
     )
