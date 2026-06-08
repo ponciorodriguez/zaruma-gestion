@@ -16,6 +16,10 @@ templates = Jinja2Templates(directory="templates")
 templates.env.filters["money"] = money
 
 
+DEFAULT_PAYMENT_TERMS = """30% en el momento de la aceptación del presupuesto mediante transferencia a la cuenta ES51 0049 7616 1120 1002 5183 (Banco Santander)
+Resto al finalizar el trabajo."""
+
+
 @router.get("/estimates", response_class=HTMLResponse)
 def estimates_page(request: Request, db: Session = Depends(get_db)):
     estimates = db.query(models.Estimate).order_by(models.Estimate.id.desc()).all()
@@ -46,6 +50,7 @@ def new_estimate_page(request: Request, db: Session = Depends(get_db)):
             "next_number": next_number,
             "today": date.today(),
             "default_vat_rate": DEFAULT_VAT_RATE,
+            "default_payment_terms": DEFAULT_PAYMENT_TERMS,
         },
     )
 
@@ -57,6 +62,7 @@ def create_estimate(
     title: str = Form(""),
     work_address: str = Form(""),
     notes: str = Form(""),
+    payment_terms: str = Form(DEFAULT_PAYMENT_TERMS),
     vat_rate: float = Form(DEFAULT_VAT_RATE),
     line_type: list[str] = Form([]),
     description: list[str] = Form([]),
@@ -74,6 +80,7 @@ def create_estimate(
         title=title,
         work_address=work_address,
         notes=notes,
+        payment_terms=payment_terms,
         status="borrador",
         subtotal_labor=totals["subtotal_labor"],
         subtotal_materials=totals["subtotal_materials"],
@@ -148,6 +155,7 @@ def update_estimate(
     title: str = Form(""),
     work_address: str = Form(""),
     notes: str = Form(""),
+    payment_terms: str = Form(DEFAULT_PAYMENT_TERMS),
     vat_rate: float = Form(DEFAULT_VAT_RATE),
     line_type: list[str] = Form([]),
     description: list[str] = Form([]),
@@ -168,6 +176,7 @@ def update_estimate(
     estimate.title = title
     estimate.work_address = work_address
     estimate.notes = notes
+    estimate.payment_terms = payment_terms
     estimate.subtotal_labor = totals["subtotal_labor"]
     estimate.subtotal_materials = totals["subtotal_materials"]
     estimate.subtotal_others = totals["subtotal_others"]
@@ -222,6 +231,7 @@ def convert_estimate_to_invoice_route(
         title=estimate.title,
         work_address=estimate.work_address,
         notes=estimate.notes,
+        payment_terms=getattr(estimate, "payment_terms", None),
         status="pendiente",
         subtotal_labor=estimate.subtotal_labor,
         subtotal_materials=estimate.subtotal_materials,

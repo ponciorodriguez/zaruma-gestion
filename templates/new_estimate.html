@@ -71,7 +71,8 @@
             <select name="line_type">
                 <option value="mano_obra">Mano de obra</option>
                 <option value="material">Material</option>
-                <option value="otros">Otros / concepto</option>
+                <option value="partida">Partida</option>
+            <option value="otros">Otros / concepto</option>
             </select>
 
             <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros"></textarea>
@@ -85,6 +86,11 @@
     </div>
 
     <button class="btn" type="button" onclick="addLine()">Añadir partida</button>
+
+    <label>
+        Forma de pago
+        <textarea name="payment_terms" rows="4">{{ default_payment_terms }}</textarea>
+    </label>
 
     <label>
         Notas / condiciones
@@ -107,6 +113,7 @@ function addLine() {
         <select name="line_type">
             <option value="mano_obra">Mano de obra</option>
             <option value="material">Material</option>
+            <option value="partida">Partida</option>
             <option value="otros">Otros / concepto</option>
         </select>
 

@@ -197,6 +197,7 @@ def _lines_table(lines, styles):
         line_type = {
             "mano_obra": "Mano de obra",
             "material": "Material",
+            "partida": "Partida",
             "otros": "Otros",
         }.get(line.line_type, line.line_type)
 
@@ -357,7 +358,7 @@ def _build_document_pdf(document, output_path, title, title_label):
         )
 
     payment_terms = getattr(document, "payment_terms", None)
-    if title in ("FACTURA", "FACTURA RECTIFICATIVA") and payment_terms:
+    if title in ("PRESUPUESTO", "FACTURA", "FACTURA RECTIFICATIVA") and payment_terms:
         story.append(Spacer(1, 6 * mm))
         story.append(Paragraph("<b>Forma de pago</b>", styles["Heading3"]))
         story.append(

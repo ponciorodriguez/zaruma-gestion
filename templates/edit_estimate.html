@@ -69,6 +69,7 @@
             <select name="line_type">
                 <option value="mano_obra" {% if line.line_type == "mano_obra" %}selected{% endif %}>Mano de obra</option>
                 <option value="material" {% if line.line_type == "material" %}selected{% endif %}>Material</option>
+                <option value="partida" {% if line.line_type == "partida" %}selected{% endif %}>Partida</option>
                 <option value="otros" {% if line.line_type == "otros" %}selected{% endif %}>Otros / concepto</option>
             </select>
 
@@ -84,6 +85,11 @@
     </div>
 
     <button class="btn" type="button" onclick="addLine()">Añadir partida</button>
+
+    <label>
+        Forma de pago
+        <textarea name="payment_terms" rows="4">{{ estimate.payment_terms or "30% en el momento de la aceptación del presupuesto mediante transferencia a la cuenta ES51 0049 7616 1120 1002 5183 (Banco Santander)\nResto al finalizar el trabajo." }}</textarea>
+    </label>
 
     <label>
         Notas / condiciones
@@ -106,6 +112,7 @@ function addLine() {
         <select name="line_type">
             <option value="mano_obra">Mano de obra</option>
             <option value="material">Material</option>
+            <option value="partida">Partida</option>
             <option value="otros">Otros / concepto</option>
         </select>
 
