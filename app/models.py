@@ -103,6 +103,7 @@ class Invoice(Base):
     status = Column(String(50), default="pendiente")
 
     notes = Column(Text, nullable=True)
+    payment_terms = Column(Text, nullable=True)
 
     subtotal_labor = Column(Float, default=0)
     subtotal_materials = Column(Float, default=0)

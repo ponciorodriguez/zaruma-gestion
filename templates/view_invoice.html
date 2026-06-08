@@ -107,6 +107,13 @@
         <div class="total-final"><span>Total:</span> <strong>{{ invoice.total_amount | money }}</strong></div>
     </div>
 
+    {% if invoice.payment_terms %}
+    <h2>Forma de pago</h2>
+    <div class="notes-box payment-terms-box">
+        {{ invoice.payment_terms | replace("\n", "<br>") | safe }}
+    </div>
+    {% endif %}
+
     {% if invoice.notes %}
     <h2>Notas</h2>
     <div class="notes-box">

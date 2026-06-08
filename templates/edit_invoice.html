@@ -89,6 +89,11 @@
         <textarea name="notes" rows="4">{{ invoice.notes or '' }}</textarea>
     </label>
 
+    <label>
+        Forma de pago
+        <textarea name="payment_terms" rows="4">{{ invoice.payment_terms or "30% en el momento de la aceptación del presupuesto mediante transferencia a la cuenta ES51 0049 7616 1120 1002 5183 (Banco Santander)\nResto al finalizar el trabajo." }}</textarea>
+    </label>
+
     <div class="form-actions">
         <a class="btn" href="/invoices/{{ invoice.id }}">Cancelar</a>
         <button class="btn btn-primary" type="submit">Guardar cambios</button>

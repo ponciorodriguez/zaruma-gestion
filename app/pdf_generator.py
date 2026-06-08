@@ -356,6 +356,17 @@ def _build_document_pdf(document, output_path, title, title_label):
             )
         )
 
+    payment_terms = getattr(document, "payment_terms", None)
+    if title in ("FACTURA", "FACTURA RECTIFICATIVA") and payment_terms:
+        story.append(Spacer(1, 6 * mm))
+        story.append(Paragraph("<b>Forma de pago</b>", styles["Heading3"]))
+        story.append(
+            Paragraph(
+                _safe_text(payment_terms).replace("\n", "<br/>"),
+                styles["Small"],
+            )
+        )
+
     if document.notes:
         story.append(Spacer(1, 8 * mm))
         story.append(Paragraph("<b>Notas / condiciones</b>", styles["Heading3"]))

@@ -21,6 +21,10 @@ templates = Jinja2Templates(directory="templates")
 templates.env.filters["money"] = money
 
 
+DEFAULT_PAYMENT_TERMS = """30% en el momento de la aceptación del presupuesto mediante transferencia a la cuenta ES51 0049 7616 1120 1002 5183 (Banco Santander)
+Resto al finalizar el trabajo."""
+
+
 @router.get("/invoices", response_class=HTMLResponse)
 def invoices_page(request: Request, db: Session = Depends(get_db)):
     invoices = db.query(models.Invoice).order_by(models.Invoice.id.desc()).all()
@@ -51,6 +55,7 @@ def new_invoice_page(request: Request, db: Session = Depends(get_db)):
             "next_number": next_number,
             "today": date.today(),
             "default_vat_rate": DEFAULT_VAT_RATE,
+            "default_payment_terms": DEFAULT_PAYMENT_TERMS,
         },
     )
 
@@ -62,6 +67,7 @@ def create_invoice(
     title: str = Form(""),
     work_address: str = Form(""),
     notes: str = Form(""),
+    payment_terms: str = Form(DEFAULT_PAYMENT_TERMS),
     vat_rate: float = Form(DEFAULT_VAT_RATE),
     line_type: list[str] = Form([]),
     description: list[str] = Form([]),
@@ -79,6 +85,7 @@ def create_invoice(
         title=title,
         work_address=work_address,
         notes=notes,
+        payment_terms=payment_terms,
         status="pendiente",
         is_rectifying=False,
         subtotal_labor=totals["subtotal_labor"],
@@ -157,6 +164,7 @@ def update_invoice(
     title: str = Form(""),
     work_address: str = Form(""),
     notes: str = Form(""),
+    payment_terms: str = Form(DEFAULT_PAYMENT_TERMS),
     vat_rate: float = Form(DEFAULT_VAT_RATE),
     line_type: list[str] = Form([]),
     description: list[str] = Form([]),
@@ -180,6 +188,7 @@ def update_invoice(
     invoice.title = title
     invoice.work_address = work_address
     invoice.notes = notes
+    invoice.payment_terms = payment_terms
     invoice.subtotal_labor = totals["subtotal_labor"]
     invoice.subtotal_materials = totals["subtotal_materials"]
     invoice.subtotal_others = totals["subtotal_others"]
