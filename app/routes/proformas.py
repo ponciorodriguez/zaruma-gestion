@@ -1,3 +1,5 @@
+import os
+from urllib.parse import quote
 from datetime import date
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -9,6 +11,8 @@ from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
 from app.pdf_generator import generate_proforma_pdf
+from app.mail_sender import send_pdf_email
+from app.config import PDF_EMAIL_TO
 from app.utils import calculate_totals, generate_invoice_number, generate_proforma_number, money
 
 router = APIRouter()
@@ -205,6 +209,49 @@ def generate_proforma_pdf_route(
 
 
 @router.post("/proformas/{proforma_id}/convert-to-invoice")
+
+
+@router.post("/proformas/{proforma_id}/send-email")
+def send_proforma_email_route(proforma_id: int, db: Session = Depends(get_db)):
+    proforma = db.query(models.Proforma).filter(models.Proforma.id == proforma_id).first()
+
+    if not proforma:
+        raise HTTPException(status_code=404, detail="Factura proforma no encontrada")
+
+    redirect_url = f"/proformas/{proforma_id}"
+
+    if not PDF_EMAIL_TO:
+        error = quote("No está configurado PDF_EMAIL_TO en el .env.")
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    if not proforma.pdf_path or not os.path.exists(proforma.pdf_path):
+        pdf_path = generate_proforma_pdf(proforma)
+        proforma.pdf_path = pdf_path
+        db.commit()
+        db.refresh(proforma)
+
+    try:
+        send_pdf_email(
+            to_email=PDF_EMAIL_TO,
+            subject=f"Factura proforma Zaruma {proforma.number}",
+            body=f"""Hola,
+
+Adjuntamos la factura proforma {proforma.number} en formato PDF.
+
+Quedamos a su disposición para cualquier aclaración.
+
+Un saludo,
+Zaruma
+""",
+            pdf_path=proforma.pdf_path,
+        )
+    except Exception as exc:
+        error = quote(str(exc))
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
+
+
 def convert_proforma_to_invoice_route(
     proforma_id: int,
     db: Session = Depends(get_db),

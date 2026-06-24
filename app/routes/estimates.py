@@ -1,3 +1,5 @@
+import os
+from urllib.parse import quote
 from datetime import date
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -9,6 +11,8 @@ from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
 from app.pdf_generator import generate_estimate_pdf
+from app.mail_sender import send_pdf_email
+from app.config import PDF_EMAIL_TO
 from app.utils import calculate_totals, generate_estimate_number, generate_invoice_number, money
 
 router = APIRouter()
@@ -214,6 +218,49 @@ def generate_estimate_pdf_route(
 
 
 @router.post("/estimates/{estimate_id}/convert-to-invoice")
+
+
+@router.post("/estimates/{estimate_id}/send-email")
+def send_estimate_email_route(estimate_id: int, db: Session = Depends(get_db)):
+    estimate = db.query(models.Estimate).filter(models.Estimate.id == estimate_id).first()
+
+    if not estimate:
+        raise HTTPException(status_code=404, detail="Presupuesto no encontrada")
+
+    redirect_url = f"/estimates/{estimate_id}"
+
+    if not PDF_EMAIL_TO:
+        error = quote("No está configurado PDF_EMAIL_TO en el .env.")
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    if not estimate.pdf_path or not os.path.exists(estimate.pdf_path):
+        pdf_path = generate_estimate_pdf(estimate)
+        estimate.pdf_path = pdf_path
+        db.commit()
+        db.refresh(estimate)
+
+    try:
+        send_pdf_email(
+            to_email=PDF_EMAIL_TO,
+            subject=f"Presupuesto Zaruma {estimate.number}",
+            body=f"""Hola,
+
+Adjuntamos el presupuesto {estimate.number} en formato PDF.
+
+Quedamos a su disposición para cualquier aclaración.
+
+Un saludo,
+Zaruma
+""",
+            pdf_path=estimate.pdf_path,
+        )
+    except Exception as exc:
+        error = quote(str(exc))
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
+
+
 def convert_estimate_to_invoice_route(
     estimate_id: int,
     db: Session = Depends(get_db),

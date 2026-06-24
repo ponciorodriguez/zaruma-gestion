@@ -19,6 +19,10 @@
             </button>
         </form>
 
+        <form method="post" action="/proformas/{{ proforma.id }}/send-email" style="display:inline;">
+            <button class="btn btn-primary" type="submit">Enviar por email</button>
+        </form>
+
         {% if proforma.status != "convertida a factura" %}
             <a class="btn" href="/edit-proforma/{{ proforma.id }}">Modificar</a>
 
@@ -32,6 +36,19 @@
         <a class="btn" href="/proformas">Volver</a>
     </div>
 </div>
+
+{% if request.query_params.get("email_sent") %}
+<div class="notes-box">
+    <strong>Email enviado correctamente.</strong>
+</div>
+{% endif %}
+
+{% if request.query_params.get("email_error") %}
+<div class="notes-box">
+    <strong>No se ha podido enviar el email:</strong>
+    {{ request.query_params.get("email_error") }}
+</div>
+{% endif %}
 
 <div class="panel document-view">
 

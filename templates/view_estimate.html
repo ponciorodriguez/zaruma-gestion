@@ -19,6 +19,10 @@
             </button>
         </form>
 
+        <form method="post" action="/estimates/{{ estimate.id }}/send-email" style="display:inline;">
+            <button class="btn btn-primary" type="submit">Enviar por email</button>
+        </form>
+
         {% if estimate.status != "convertido a factura" %}
         <form method="post" action="/estimates/{{ estimate.id }}/convert-to-invoice" style="display:inline;">
             <button class="btn btn-primary" type="submit">Convertir en factura</button>
@@ -29,6 +33,19 @@
         <a class="btn" href="/estimates">Volver</a>
     </div>
 </div>
+
+{% if request.query_params.get("email_sent") %}
+<div class="notes-box">
+    <strong>Email enviado correctamente.</strong>
+</div>
+{% endif %}
+
+{% if request.query_params.get("email_error") %}
+<div class="notes-box">
+    <strong>No se ha podido enviar el email:</strong>
+    {{ request.query_params.get("email_error") }}
+</div>
+{% endif %}
 
 <div class="panel document-view">
 

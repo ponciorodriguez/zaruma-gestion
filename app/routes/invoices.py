@@ -1,3 +1,5 @@
+import os
+from urllib.parse import quote
 from datetime import date
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -9,6 +11,8 @@ from app import models
 from app.config import APP_NAME, DEFAULT_VAT_RATE
 from app.db import get_db
 from app.pdf_generator import generate_invoice_pdf
+from app.mail_sender import send_pdf_email
+from app.config import PDF_EMAIL_TO
 from app.utils import (
     calculate_totals,
     generate_invoice_number,
@@ -225,6 +229,49 @@ def generate_invoice_pdf_route(
 
 
 @router.post("/invoices/{invoice_id}/mark-sent")
+
+
+@router.post("/invoices/{invoice_id}/send-email")
+def send_invoice_email_route(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
+
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Factura no encontrada")
+
+    redirect_url = f"/invoices/{invoice_id}"
+
+    if not PDF_EMAIL_TO:
+        error = quote("No está configurado PDF_EMAIL_TO en el .env.")
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    if not invoice.pdf_path or not os.path.exists(invoice.pdf_path):
+        pdf_path = generate_invoice_pdf(invoice)
+        invoice.pdf_path = pdf_path
+        db.commit()
+        db.refresh(invoice)
+
+    try:
+        send_pdf_email(
+            to_email=PDF_EMAIL_TO,
+            subject=f"Factura rectificativa Zaruma {invoice.number}" if invoice.is_rectifying else f"Factura Zaruma {invoice.number}",
+            body=f"""Hola,
+
+Adjuntamos la {"factura rectificativa" if invoice.is_rectifying else "factura"} {invoice.number} en formato PDF.
+
+Quedamos a su disposición para cualquier aclaración.
+
+Un saludo,
+Zaruma
+""",
+            pdf_path=invoice.pdf_path,
+        )
+    except Exception as exc:
+        error = quote(str(exc))
+        return RedirectResponse(url=f"{redirect_url}?email_error={error}", status_code=303)
+
+    return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
+
+
 def mark_invoice_sent_route(
     invoice_id: int,
     db: Session = Depends(get_db),
