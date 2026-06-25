@@ -208,9 +208,6 @@ def generate_proforma_pdf_route(
     return RedirectResponse(url=f"/proformas/{proforma.id}", status_code=303)
 
 
-@router.post("/proformas/{proforma_id}/convert-to-invoice")
-
-
 @router.post("/proformas/{proforma_id}/send-email")
 def send_proforma_email_route(proforma_id: int, db: Session = Depends(get_db)):
     proforma = db.query(models.Proforma).filter(models.Proforma.id == proforma_id).first()
@@ -252,6 +249,7 @@ Zaruma
     return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
 
 
+@router.post("/proformas/{proforma_id}/convert-to-invoice")
 def convert_proforma_to_invoice_route(
     proforma_id: int,
     db: Session = Depends(get_db),
