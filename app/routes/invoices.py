@@ -228,9 +228,6 @@ def generate_invoice_pdf_route(
     return RedirectResponse(url=f"/invoices/{invoice.id}", status_code=303)
 
 
-@router.post("/invoices/{invoice_id}/mark-sent")
-
-
 @router.post("/invoices/{invoice_id}/send-email")
 def send_invoice_email_route(invoice_id: int, db: Session = Depends(get_db)):
     invoice = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
@@ -272,6 +269,7 @@ Zaruma
     return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
 
 
+@router.post("/invoices/{invoice_id}/mark-sent")
 def mark_invoice_sent_route(
     invoice_id: int,
     db: Session = Depends(get_db),
@@ -290,7 +288,10 @@ def mark_invoice_sent_route(
 @router.post("/invoices/{invoice_id}/create-rectifying")
 def create_rectifying_invoice_route(
     invoice_id: int,
+    rectification_type: str = Form("total"),
+    rectification_amount: float = Form(0),
     rectification_reason: str = Form("Anulación total de la factura original."),
+    balance_destination: str = Form("compensar"),
     db: Session = Depends(get_db),
 ):
     original = db.query(models.Invoice).filter(models.Invoice.id == invoice_id).first()
@@ -298,74 +299,124 @@ def create_rectifying_invoice_route(
     if not original:
         return RedirectResponse(url="/invoices", status_code=303)
 
-    rectifying = models.Invoice(
-        number=generate_rectifying_invoice_number(db),
-        date=date.today(),
-        client_id=original.client_id,
-        estimate_id=None,
-        title=f"Factura rectificativa de {original.number}",
-        work_address=original.work_address,
-        notes=(
-            f"Factura rectificativa de la factura nº {original.number}.\n\n"
-            f"Motivo de rectificación: {rectification_reason}"
-        ),
-        status="pendiente",
-        is_rectifying=True,
-        rectifies_invoice_number=original.number,
-        rectifies_invoice_date=original.date,
-        rectification_reason=rectification_reason,
-        subtotal_labor=-abs(original.subtotal_labor or 0),
-        subtotal_materials=-abs(original.subtotal_materials or 0),
-        subtotal_others=-abs(original.subtotal_others or 0),
-        base_amount=-abs(original.base_amount or 0),
-        vat_rate=original.vat_rate,
-        vat_amount=-abs(original.vat_amount or 0),
-        total_amount=-abs(original.total_amount or 0),
-    )
+    vat_rate = float(original.vat_rate or 0)
 
-    db.add(rectifying)
-    db.flush()
+    if rectification_type == "partial":
+        base_amount = -abs(float(rectification_amount or 0))
 
-    for position, line in enumerate(original.lines, start=1):
+        if base_amount == 0:
+            return RedirectResponse(
+                url=f"/invoices/{original.id}?email_error=Importe de abono parcial no válido",
+                status_code=303,
+            )
+
+        vat_amount = base_amount * vat_rate / 100
+        total_amount = base_amount + vat_amount
+
+        if balance_destination == "devolver":
+            destination_text = "El saldo queda pendiente de devolución al cliente."
+        else:
+            destination_text = "El saldo queda pendiente para compensar en una próxima factura."
+
+        notes = (
+            f"Factura rectificativa / abono de la factura nº {original.number}.\n\n"
+            f"Motivo de rectificación: {rectification_reason}\n\n"
+            f"{destination_text}"
+        )
+
+        rectifying = models.Invoice(
+            number=generate_rectifying_invoice_number(db),
+            date=date.today(),
+            client_id=original.client_id,
+            estimate_id=None,
+            title=f"Abono parcial de {original.number}",
+            work_address=original.work_address,
+            notes=notes,
+            payment_terms=getattr(original, "payment_terms", None),
+            status="pendiente",
+            is_rectifying=True,
+            rectifies_invoice_number=original.number,
+            rectifies_invoice_date=original.date,
+            rectification_reason=rectification_reason,
+            subtotal_labor=0,
+            subtotal_materials=0,
+            subtotal_others=base_amount,
+            base_amount=base_amount,
+            vat_rate=vat_rate,
+            vat_amount=vat_amount,
+            total_amount=total_amount,
+            pdf_path=None,
+        )
+
+        db.add(rectifying)
+        db.flush()
+
         db.add(
             models.InvoiceLine(
                 invoice_id=rectifying.id,
-                line_type=line.line_type,
-                description=f"Rectificación factura {original.number}:\n{line.description}",
-                quantity=abs(line.quantity or 0),
-                unit_price=-abs(line.unit_price or 0),
-                line_total=-abs(line.line_total or 0),
-                position=position,
+                line_type="partida",
+                description=(
+                    f"Abono parcial de la factura {original.number} por trabajos no realizados. "
+                    f"Motivo: {rectification_reason}. {destination_text}"
+                ),
+                quantity=1,
+                unit_price=base_amount,
+                line_total=base_amount,
+                position=1,
             )
         )
 
+    else:
+        rectification_reason = rectification_reason or "Anulación total de la factura original."
+
+        rectifying = models.Invoice(
+            number=generate_rectifying_invoice_number(db),
+            date=date.today(),
+            client_id=original.client_id,
+            estimate_id=None,
+            title=f"Factura rectificativa de {original.number}",
+            work_address=original.work_address,
+            notes=(
+                f"Factura rectificativa / abono de la factura nº {original.number}.\n\n"
+                f"Motivo de rectificación: {rectification_reason}"
+            ),
+            payment_terms=getattr(original, "payment_terms", None),
+            status="pendiente",
+            is_rectifying=True,
+            rectifies_invoice_number=original.number,
+            rectifies_invoice_date=original.date,
+            rectification_reason=rectification_reason,
+            subtotal_labor=-abs(original.subtotal_labor or 0),
+            subtotal_materials=-abs(original.subtotal_materials or 0),
+            subtotal_others=-abs(original.subtotal_others or 0),
+            base_amount=-abs(original.base_amount or 0),
+            vat_rate=original.vat_rate,
+            vat_amount=-abs(original.vat_amount or 0),
+            total_amount=-abs(original.total_amount or 0),
+            pdf_path=None,
+        )
+
+        db.add(rectifying)
+        db.flush()
+
+        for position, line in enumerate(original.lines, start=1):
+            db.add(
+                models.InvoiceLine(
+                    invoice_id=rectifying.id,
+                    line_type=line.line_type,
+                    description=line.description,
+                    quantity=line.quantity,
+                    unit_price=-abs(line.unit_price or 0),
+                    line_total=-abs(line.line_total or 0),
+                    position=position,
+                )
+            )
+
     db.commit()
+    db.refresh(rectifying)
 
     return RedirectResponse(url=f"/invoices/{rectifying.id}", status_code=303)
 
-
-def _build_lines_data(line_type, description, quantity, unit_price):
-    lines_data = []
-
-    for idx, desc in enumerate(description):
-        desc = (desc or "").strip()
-        if not desc:
-            continue
-
-        lt = line_type[idx] if idx < len(line_type) else "otros"
-        qty = quantity[idx] if idx < len(quantity) else 1
-        price = unit_price[idx] if idx < len(unit_price) else 0
-
-        lines_data.append(
-            {
-                "line_type": lt,
-                "description": desc,
-                "quantity": qty,
-                "unit_price": price,
-            }
-        )
-
-    return lines_data
 
 
 def _save_invoice_lines(db, invoice_id, lines):

@@ -34,11 +34,27 @@
         {% endif %}
 
         <a class="btn" href="/invoices">Volver</a>
-
         {% if not invoice.is_rectifying %}
-        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form" onsubmit="return confirm('Vas a crear una FACTURA RECTIFICATIVA de esta factura.\n\nSe creará una nueva factura con numeración independiente R-....\n\n¿Seguro que quieres continuar?');">
-            <input type="text" name="rectification_reason" value="Anulación total de la factura original." placeholder="Motivo de rectificación" title="Motivo de la factura rectificativa">
-            <button class="btn btn-danger" type="submit">Crear factura rectificativa</button>
+        <form method="post" action="/invoices/{{ invoice.id }}/create-rectifying" class="inline-rectifying-form" onsubmit="return confirm('Vas a crear una FACTURA RECTIFICATIVA / ABONO de esta factura.
+
+Se creará una nueva factura con numeración independiente R-....
+
+¿Seguro que quieres continuar?');">
+            <select name="rectification_type" title="Tipo de rectificación">
+                <option value="total">Anulación total</option>
+                <option value="partial">Abono parcial por trabajos no realizados</option>
+            </select>
+
+            <input type="number" name="rectification_amount" value="0" step="0.01" placeholder="Base a abonar">
+
+            <input type="text" name="rectification_reason" value="Trabajos incluidos en la factura original que finalmente no se ejecutaron." placeholder="Motivo de rectificación" title="Motivo de la factura rectificativa">
+
+            <select name="balance_destination" title="Destino del saldo">
+                <option value="compensar">Compensar en próxima factura</option>
+                <option value="devolver">Devolución al cliente</option>
+            </select>
+
+            <button class="btn btn-danger" type="submit">Crear rectificativa / abono</button>
         </form>
         {% endif %}
     </div>
