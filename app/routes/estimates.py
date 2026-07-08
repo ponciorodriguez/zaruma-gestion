@@ -217,9 +217,6 @@ def generate_estimate_pdf_route(
 
 
 
-@router.post("/estimates/{estimate_id}/convert-to-invoice")
-
-
 @router.post("/estimates/{estimate_id}/send-email")
 def send_estimate_email_route(estimate_id: int, db: Session = Depends(get_db)):
     estimate = db.query(models.Estimate).filter(models.Estimate.id == estimate_id).first()
@@ -261,6 +258,7 @@ Zaruma
     return RedirectResponse(url=f"{redirect_url}?email_sent=1", status_code=303)
 
 
+@router.post("/estimates/{estimate_id}/convert-to-invoice")
 def convert_estimate_to_invoice_route(
     estimate_id: int,
     db: Session = Depends(get_db),
