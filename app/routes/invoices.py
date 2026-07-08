@@ -419,6 +419,37 @@ def create_rectifying_invoice_route(
 
 
 
+def _build_lines_data(line_types, descriptions, quantities, unit_prices):
+    lines = []
+
+    for line_type, description, quantity, unit_price in zip(
+        line_types,
+        descriptions,
+        quantities,
+        unit_prices,
+    ):
+        description = (description or "").strip()
+
+        if not description:
+            continue
+
+        quantity = float(quantity or 0)
+        unit_price = float(unit_price or 0)
+        line_total = quantity * unit_price
+
+        lines.append(
+            {
+                "line_type": line_type,
+                "description": description,
+                "quantity": quantity,
+                "unit_price": unit_price,
+                "line_total": line_total,
+            }
+        )
+
+    return lines
+
+
 def _save_invoice_lines(db, invoice_id, lines):
     for position, line in enumerate(lines, start=1):
         db.add(
