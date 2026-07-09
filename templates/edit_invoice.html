@@ -163,7 +163,17 @@ function createLine() {
 
 function addLine() {
     const box = document.getElementById("lines-box");
-    box.appendChild(createLine());
+    const row = createLine();
+
+    box.appendChild(row);
+
+    const select = row.querySelector('select[name="line_type"]');
+    if (select) {
+        select.addEventListener("change", function () {
+            toggleDatePeriodFields(select);
+        });
+        toggleDatePeriodFields(select);
+    }
 }
 
 function insertLineAfter(button) {
