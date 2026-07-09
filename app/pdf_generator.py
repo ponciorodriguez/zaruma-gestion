@@ -229,6 +229,7 @@ def _lines_table(lines, styles):
         line_type = {
             "mano_obra": "Mano de obra",
             "material": "Material",
+            "fecha": "Fecha / periodo",
             "texto": "",
             "partida": "Partida",
             "otros": "Otros",

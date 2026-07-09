@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from app.template_globals import register_template_globals
 
 from app.config import (
     APP_NAME,
@@ -15,7 +16,7 @@ from app.config import (
 )
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = register_template_globals(Jinja2Templates(directory="templates"))
 
 
 @router.get("/settings", response_class=HTMLResponse)

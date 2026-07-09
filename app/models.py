@@ -233,3 +233,14 @@ class EstimatePhoto(Base):
 
     position = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class InternalNote(Base):
+    __tablename__ = "internal_notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False, default="Nota interna")
+    message = Column(Text, nullable=False)
+    status = Column(String, nullable=False, default="open")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    closed_at = Column(DateTime, nullable=True)

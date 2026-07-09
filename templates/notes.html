@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h1>Notas internas</h1>
+
+    <form method="post" action="/notes" class="form-card">
+        <label>Título</label>
+        <input type="text" name="title" value="Nota interna">
+
+        <label>Nota</label>
+        <textarea name="message" rows="4" placeholder="Ej: Hay que descontar de la factura F-2026-0014 la cantidad de 250 €." required></textarea>
+
+        <button class="btn" type="submit">Guardar nota</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Notas abiertas</h2>
+
+    {% set open_notes = notes | selectattr("status", "equalto", "open") | list %}
+
+    {% if open_notes %}
+        {% for note in open_notes %}
+        <div class="note-box note-open">
+            <h3>{{ note.title }}</h3>
+            <p>{{ note.message }}</p>
+            <small>Creada: {{ note.created_at.strftime("%d/%m/%Y %H:%M") if note.created_at else "" }}</small>
+
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <a class="btn" href="/notes/{{ note.id }}/edit">Editar</a>
+
+                <form method="post" action="/notes/{{ note.id }}/close">
+                    <button class="btn btn-success" type="submit">Cerrar nota</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay notas abiertas.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Notas cerradas</h2>
+
+    {% set closed_notes = notes | selectattr("status", "equalto", "closed") | list %}
+
+    {% if closed_notes %}
+        {% for note in closed_notes %}
+        <div class="note-box note-closed">
+            <h3>{{ note.title }}</h3>
+            <p>{{ note.message }}</p>
+            <small>
+                Creada: {{ note.created_at.strftime("%d/%m/%Y %H:%M") if note.created_at else "" }}
+                {% if note.closed_at %}
+                · Cerrada: {{ note.closed_at.strftime("%d/%m/%Y %H:%M") }}
+                {% endif %}
+            </small>
+
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <a class="btn" href="/notes/{{ note.id }}/edit">Editar</a>
+
+                <form method="post" action="/notes/{{ note.id }}/reopen">
+                    <button class="btn" type="submit">Reabrir</button>
+                </form>
+
+                <form method="post" action="/notes/{{ note.id }}/delete" onsubmit="return confirm('¿Borrar esta nota definitivamente?')">
+                    <button class="btn btn-danger" type="submit">Borrar</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay notas cerradas.</p>
+    {% endif %}
+</div>
+
+<style>
+.note-box {
+    border: 1px solid #d6dee3;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+.note-open {
+    border-left: 5px solid #b91c1c;
+}
+
+.note-closed {
+    border-left: 5px solid #15803d;
+    opacity: 0.85;
+}
+
+.note-box h3 {
+    margin: 0 0 8px 0;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h1>Editar nota interna</h1>
+
+    <form method="post" action="/notes/{{ note.id }}/edit" class="form-card">
+        <label>Título</label>
+        <input type="text" name="title" value="{{ note.title }}">
+
+        <label>Nota</label>
+        <textarea name="message" rows="5" required>{{ note.message }}</textarea>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn" type="submit">Guardar cambios</button>
+            <a class="btn" href="/notes">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -66,23 +66,32 @@
     <div class="lines-box" id="lines-box">
         {% for line in proforma.lines %}
         <div class="line-row">
-            <select name="line_type">
+            <select name="line_type" onchange="toggleDatePeriodFields(this)">
                 <option value="mano_obra" {% if line.line_type == "mano_obra" %}selected{% endif %}>Mano de obra</option>
                 <option value="material" {% if line.line_type == "material" %}selected{% endif %}>Material</option>
+                <option value="fecha" {% if line.line_type == "fecha" %}selected{% endif %}>Fecha / periodo</option>
                 <option value="otros" {% if line.line_type == "otros" %}selected{% endif %}>Otros / concepto</option>
             </select>
 
             <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros">{{ line.description }}</textarea>
 
-            <input type="number" name="quantity" value="{{ line.quantity }}" step="0.01" placeholder="Horas / uds.">
+            <div class="date-period-fields" style="display:none;">
+                <label style="font-size:12px;">Fecha inicio
+                    <input type="date" class="date-start" onchange="updateDatePeriodDescription(this)">
+                </label>
+                <label style="font-size:12px;">Fecha fin
+                    <input type="date" class="date-end" onchange="updateDatePeriodDescription(this)">
+                </label>
+            </div>
 
-            <input type="number" name="unit_price" value="{{ line.unit_price }}" step="0.01" placeholder="€/hora o €/ud.">
+
+            <input type="number" name="quantity" class="line-quantity" value="{{ line.quantity }}" step="0.01" placeholder="Horas / uds.">
+
+            <input type="number" name="unit_price" class="line-unit-price" value="{{ line.unit_price }}" step="0.01" placeholder="€/hora o €/ud.">
 
             <div class="line-actions">
-                <button class="btn" type="button" onclick="insertLineAfter(this)">+ debajo</button>
-                <div class="line-actions">
-                <button class="btn" type="button" onclick="insertLineAfter(this)">+ debajo</button>
-                <button class="btn btn-danger" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
+                <button class="btn btn-small" type="button" onclick="insertLineAfter(this)">+ debajo</button>
+                <button class="btn btn-danger btn-small" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
             </div>
             </div>
         </div>
@@ -106,25 +115,36 @@
 <script>
 function lineTemplate() {
     return `
-        <select name="line_type">
+        <select name="line_type" onchange="toggleDatePeriodFields(this)">
             <option value="mano_obra">Mano de obra</option>
             <option value="material">Material</option>
-            <option value="texto">Texto</option>
+                <option value="fecha">Fecha / periodo</option>
+                <option value="texto">Texto</option>
             <option value="partida">Partida</option>
             <option value="otros">Otros / concepto</option>
         </select>
 
-        <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros"></textarea>
 
-        <input type="number" name="quantity" value="1" step="0.01" placeholder="Horas / uds.">
 
-        <input type="number" name="unit_price" value="0" step="0.01" placeholder="€/hora o €/ud.">
+            <textarea name="description" rows="2" placeholder="Ej: Oficial albañil / Ladrillo H8 / Retirada escombros"></textarea>
+
+            <div class="date-period-fields" style="display:none;">
+                <label style="font-size:12px;">Fecha inicio
+                    <input type="date" class="date-start" onchange="updateDatePeriodDescription(this)">
+                </label>
+                <label style="font-size:12px;">Fecha fin
+                    <input type="date" class="date-end" onchange="updateDatePeriodDescription(this)">
+                </label>
+            </div>
+
+
+        <input type="number" name="quantity" class="line-quantity" value="1" step="0.01" placeholder="Horas / uds.">
+
+        <input type="number" name="unit_price" class="line-unit-price" value="0" step="0.01" placeholder="€/hora o €/ud.">
 
         <div class="line-actions">
-            <button class="btn" type="button" onclick="insertLineAfter(this)">+ debajo</button>
-            <div class="line-actions">
-                <button class="btn" type="button" onclick="insertLineAfter(this)">+ debajo</button>
-                <button class="btn btn-danger" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
+                <button class="btn btn-small" type="button" onclick="insertLineAfter(this)">+ debajo</button>
+                <button class="btn btn-danger btn-small" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
             </div>
         </div>
     `;
@@ -146,6 +166,152 @@ function insertLineAfter(button) {
     const currentRow = button.closest(".line-row");
     currentRow.insertAdjacentElement("afterend", createLine());
 }
+
+
+function formatDateSpanish(value) {
+    if (!value) return "";
+    const parts = value.split("-");
+    if (parts.length !== 3) return value;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function spanishToIsoDate(value) {
+    if (!value) return "";
+    const parts = value.trim().split("/");
+    if (parts.length !== 3) return "";
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
+function restoreDatePeriodInputs(row) {
+    if (!row) return;
+
+    const textarea = row.querySelector('textarea[name="description"]');
+    const startInput = row.querySelector(".date-start");
+    const endInput = row.querySelector(".date-end");
+
+    if (!textarea || !startInput || !endInput) return;
+
+    const text = textarea.value || "";
+
+    let match = text.match(/Trabajos realizados el día (\d{2}\/\d{2}\/\d{4})/);
+    if (match) {
+        const iso = spanishToIsoDate(match[1]);
+        startInput.value = iso;
+        endInput.value = iso;
+        return;
+    }
+
+    match = text.match(/Trabajos realizados del (\d{2}\/\d{2}\/\d{4}) al (\d{2}\/\d{2}\/\d{4})/);
+    if (match) {
+        startInput.value = spanishToIsoDate(match[1]);
+        endInput.value = spanishToIsoDate(match[2]);
+    }
+}
+
+function updateDatePeriodDescription(input) {
+    const row = input.closest(".line-row");
+    if (!row) return;
+
+    const start = row.querySelector(".date-start")?.value || "";
+    const end = row.querySelector(".date-end")?.value || "";
+    const textarea = row.querySelector('textarea[name="description"]');
+
+    if (!textarea) return;
+
+    const startText = formatDateSpanish(start);
+    const endText = formatDateSpanish(end);
+
+    if (startText && endText) {
+        if (startText === endText) {
+            textarea.value = `Trabajos realizados el día ${startText}`;
+        } else {
+            textarea.value = `Trabajos realizados del ${startText} al ${endText}`;
+        }
+    } else if (startText) {
+        textarea.value = `Trabajos realizados el día ${startText}`;
+    }
+}
+
+function toggleDatePeriodFields(select) {
+    const row = select.closest(".line-row");
+    if (!row) return;
+
+    const box = row.querySelector(".date-period-fields");
+    const quantity = row.querySelector('input[name="quantity"]');
+    const unitPrice = row.querySelector('input[name="unit_price"]');
+
+    if (!box) return;
+
+    if (select.value === "fecha") {
+        box.style.display = "flex";
+
+        if (quantity) {
+            quantity.value = 0;
+            quantity.style.visibility = "hidden";
+        }
+
+        if (unitPrice) {
+            unitPrice.value = 0;
+            unitPrice.style.visibility = "hidden";
+        }
+
+        restoreDatePeriodInputs(row);
+    } else {
+        box.style.display = "none";
+
+        if (quantity) {
+            quantity.style.visibility = "visible";
+            if (!quantity.value || quantity.value == 0) quantity.value = 1;
+        }
+
+        if (unitPrice) {
+            unitPrice.style.visibility = "visible";
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('select[name="line_type"]').forEach(function (select) {
+        select.addEventListener("change", function () {
+            toggleDatePeriodFields(select);
+        });
+
+        toggleDatePeriodFields(select);
+    });
+});
+
 </script>
 
 {% endblock %}
+
+
+<style>
+.line-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.line-actions .btn,
+.line-actions .btn-danger,
+.line-actions .btn-small {
+    padding: 4px 7px !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    width: 62px !important;
+    border-radius: 5px !important;
+    text-align: center !important;
+}
+
+.line-actions .btn {
+    background: #405864;
+}
+
+.line-actions .btn-danger {
+    background: #b91c1c;
+}
+</style>
+

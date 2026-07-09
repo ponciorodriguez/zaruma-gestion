@@ -6,6 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="/static/style.css?v=6">
+
+<style>
+.notes-nav {
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.notes-alert {
+    background: #b91c1c;
+}
+
+.notes-ok {
+    background: #15803d;
+}
+</style>
+
+<style>
+.nav a.notes-nav.notes-alert,
+.nav a.notes-nav.notes-alert:visited {
+    background: #b91c1c !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    font-weight: 700 !important;
+}
+
+.nav a.notes-nav.notes-ok,
+.nav a.notes-nav.notes-ok:visited {
+    background: #15803d !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    font-weight: 700 !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -24,6 +62,14 @@
         <a href="/invoices">Facturas</a>
         <a href="/settings">Configuración</a>
         <a href="/instructions">Instrucciones</a>
+        {% if get_open_notes_count is defined %}
+        {% set pending_notes = get_open_notes_count() %}
+        {% else %}
+        {% set pending_notes = 0 %}
+        {% endif %}
+        <a href="/notes" class="notes-nav {% if pending_notes > 0 %}notes-alert{% else %}notes-ok{% endif %}">
+            Notas{% if pending_notes > 0 %} ({{ pending_notes }}){% endif %}
+        </a>
     </nav>
 </header>
 

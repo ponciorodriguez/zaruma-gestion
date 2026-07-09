@@ -14,9 +14,10 @@ from app.pdf_generator import generate_estimate_pdf
 from app.mail_sender import send_pdf_email
 from app.config import PDF_EMAIL_TO
 from app.utils import calculate_totals, generate_estimate_number, generate_invoice_number, money
+from app.template_globals import register_template_globals
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = register_template_globals(Jinja2Templates(directory="templates"))
 templates.env.filters["money"] = money
 
 
