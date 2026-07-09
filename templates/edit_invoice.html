@@ -92,7 +92,6 @@
                 <button class="btn btn-small" type="button" onclick="insertLineAfter(this)">+ debajo</button>
                 <button class="btn btn-danger btn-small" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
             </div>
-            </div>
         </div>
         {% endfor %}
     </div>
@@ -165,7 +164,14 @@ function addLine() {
     const box = document.getElementById("lines-box");
     const row = createLine();
 
-    box.appendChild(row);
+    const rows = box.querySelectorAll(".line-row");
+    const lastRow = rows[rows.length - 1];
+
+    if (lastRow) {
+        lastRow.after(row);
+    } else {
+        box.appendChild(row);
+    }
 
     const select = row.querySelector('select[name="line_type"]');
     if (select) {
