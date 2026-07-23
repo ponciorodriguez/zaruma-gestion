@@ -421,21 +421,45 @@ def create_rectifying_invoice_route(
 
 
 def _build_lines_data(line_types, descriptions, quantities, unit_prices):
+    valid_line_types = {
+        "mano_obra",
+        "material",
+        "fecha",
+        "texto",
+        "partida",
+        "otros",
+    }
+
     lines = []
 
-    for line_type, description, quantity, unit_price in zip(
-        line_types,
-        descriptions,
-        quantities,
-        unit_prices,
-    ):
-        description = (description or "").strip()
+    # Recorremos por descripción para evitar que zip() descarte
+    # silenciosamente líneas si alguna lista llega incompleta.
+    for index, raw_description in enumerate(descriptions):
+        description = (raw_description or "").strip()
 
         if not description:
             continue
 
-        quantity = float(quantity or 0)
-        unit_price = float(unit_price or 0)
+        raw_line_type = (
+            line_types[index]
+            if index < len(line_types)
+            else "otros"
+        )
+        line_type = (raw_line_type or "otros").strip()
+
+        if line_type not in valid_line_types:
+            line_type = "otros"
+
+        quantity = (
+            float(quantities[index] or 0)
+            if index < len(quantities)
+            else 0.0
+        )
+        unit_price = (
+            float(unit_prices[index] or 0)
+            if index < len(unit_prices)
+            else 0.0
+        )
         line_total = quantity * unit_price
 
         lines.append(

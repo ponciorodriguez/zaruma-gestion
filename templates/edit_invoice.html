@@ -65,10 +65,12 @@
     <div class="lines-box" id="lines-box">
         {% for line in invoice.lines %}
         <div class="line-row">
-            <select name="line_type" onchange="toggleDatePeriodFields(this)">
+            <select name="line_type" onchange="toggleDatePeriodFields(this)" required>
                 <option value="mano_obra" {% if line.line_type == "mano_obra" %}selected{% endif %}>Mano de obra</option>
                 <option value="material" {% if line.line_type == "material" %}selected{% endif %}>Material</option>
                 <option value="fecha" {% if line.line_type == "fecha" %}selected{% endif %}>Fecha / periodo</option>
+                <option value="texto" {% if line.line_type == "texto" %}selected{% endif %}>Texto</option>
+                <option value="partida" {% if line.line_type == "partida" %}selected{% endif %}>Partida</option>
                 <option value="otros" {% if line.line_type == "otros" %}selected{% endif %}>Otros / concepto</option>
             </select>
 
@@ -118,11 +120,11 @@
 <script>
 function lineTemplate() {
     return `
-        <select name="line_type" onchange="toggleDatePeriodFields(this)">
+        <select name="line_type" onchange="toggleDatePeriodFields(this)" required>
             <option value="mano_obra">Mano de obra</option>
             <option value="material">Material</option>
-                <option value="fecha">Fecha / periodo</option>
-                <option value="texto">Texto</option>
+            <option value="fecha">Fecha / periodo</option>
+            <option value="texto">Texto</option>
             <option value="partida">Partida</option>
             <option value="otros">Otros / concepto</option>
         </select>
@@ -149,7 +151,7 @@ function lineTemplate() {
                 <button class="btn btn-small" type="button" onclick="insertLineAfter(this)">+ debajo</button>
                 <button class="btn btn-danger btn-small" type="button" onclick="this.closest('.line-row').remove()">Quitar</button>
             </div>
-        </div>
+
     `;
 }
 
